@@ -6,7 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
 import { GrpcExceptionFilter } from './utils/grpc-exception-filter';
 
-const logger = new Logger('main.ts');
+const logger = new Logger('Main');
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
