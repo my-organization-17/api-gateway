@@ -3,10 +3,14 @@ import { ClientGrpc } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
 
 import {
+  CreateMenuCategoryRequest,
   MENU_CATEGORY_SERVICE_NAME,
+  MenuCategory,
   MenuCategoryList,
   MenuCategoryListWithItems,
   MenuCategoryServiceClient,
+  StatusResponse,
+  UpdateMenuCategoryRequest,
 } from 'src/generated-types/menu-category';
 
 @Injectable()
@@ -39,6 +43,51 @@ export class MenuCategoryService implements OnModuleInit {
       return this.menuCategoryService.getMenuCategoriesByLanguage({ language });
     } catch (error) {
       this.logger.error(`Failed to fetch menu categories: ${(error as Error).message || 'Unknown error'}`);
+      throw error;
+    }
+  }
+  getMenuCategoryById(id: string): Observable<MenuCategory> {
+    this.logger.log(`Fetching menu category by ID: ${id}`);
+    try {
+      return this.menuCategoryService.getMenuCategoryById({ id });
+    } catch (error) {
+      this.logger.error(`Failed to fetch menu category by ID: ${(error as Error).message || 'Unknown error'}`);
+      throw error;
+    }
+  }
+  createMenuCategory(data: CreateMenuCategoryRequest): Observable<MenuCategory> {
+    this.logger.log(`Creating menu category with data: ${JSON.stringify(data)}`);
+    try {
+      return this.menuCategoryService.createMenuCategory(data);
+    } catch (error) {
+      this.logger.error(`Failed to create menu category: ${(error as Error).message || 'Unknown error'}`);
+      throw error;
+    }
+  }
+  updateMenuCategory(data: UpdateMenuCategoryRequest): Observable<MenuCategory> {
+    this.logger.log(`Updating menu category with data: ${JSON.stringify(data)}`);
+    try {
+      return this.menuCategoryService.updateMenuCategory(data);
+    } catch (error) {
+      this.logger.error(`Failed to update menu category: ${(error as Error).message || 'Unknown error'}`);
+      throw error;
+    }
+  }
+  changeMenuCategoryPosition(id: string, position: number): Observable<MenuCategory> {
+    this.logger.log(`Changing position of menu category ID: ${id} to position: ${position}`);
+    try {
+      return this.menuCategoryService.changeMenuCategoryPosition({ id, position });
+    } catch (error) {
+      this.logger.error(`Failed to change menu category position: ${(error as Error).message || 'Unknown error'}`);
+      throw error;
+    }
+  }
+  deleteMenuCategory(id: string): Observable<StatusResponse> {
+    this.logger.log(`Deleting menu category with ID: ${id}`);
+    try {
+      return this.menuCategoryService.deleteMenuCategory({ id });
+    } catch (error) {
+      this.logger.error(`Failed to delete menu category: ${(error as Error).message || 'Unknown error'}`);
       throw error;
     }
   }

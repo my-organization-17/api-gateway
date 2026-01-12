@@ -4,7 +4,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 
 import { AppModule } from './app.module';
-import { GrpcExceptionFilter } from './errors/grpc-exception-filter';
+import { GrpcExceptionFilter } from './utils/grpc-exception-filter';
 
 const logger = new Logger('main.ts');
 

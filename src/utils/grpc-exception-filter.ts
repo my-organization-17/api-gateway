@@ -1,4 +1,4 @@
-import { type ArgumentsHost, Catch, ExceptionFilter, Logger } from '@nestjs/common';
+import { type ArgumentsHost, Catch, ExceptionFilter, HttpException, Logger } from '@nestjs/common';
 import type { Response } from 'express';
 
 import { grpcToHttpCode } from './grpc-to-http-code';
@@ -23,9 +23,18 @@ export class GrpcExceptionFilter implements ExceptionFilter {
       });
     }
 
-    // fallback (non-gRPC error)
+    // Handle http exceptions
+    if (exception instanceof HttpException) {
+      const status = exception.getStatus();
+      const responseBody = exception.getResponse();
+
+      this.logger.error(`HTTP Exception caught: status=${status}, response=${JSON.stringify(responseBody)}`);
+      return response.status(status).json(responseBody);
+    }
+
+    // fallback (500 - Internal Server Error)
     const exceptionMessage = exception instanceof Error ? exception.message : String(exception);
-    this.logger.error(`Non-gRPC Exception caught: ${exceptionMessage}`);
+    this.logger.error(`Internal Server Error: ${exceptionMessage}`);
     return response.status(500).json({
       statusCode: 500,
       message: exceptionMessage || 'Internal server error',

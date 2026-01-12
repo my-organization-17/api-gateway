@@ -18,6 +18,7 @@ export class FullMenuController {
   })
   @ApiResponse({
     status: 200,
+    type: Observable<MenuCategoryListWithItems>,
     description: 'Returns the full menu structure for the specified language',
   })
   getFullMenuByLanguage(@Query('language') language: string): Observable<MenuCategoryListWithItems> {
