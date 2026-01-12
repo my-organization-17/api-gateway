@@ -1,0 +1,86 @@
+syntax = "proto3";
+
+package menu_item.v1;
+
+import "google/protobuf/timestamp.proto";
+
+// MenuItemService defines the gRPC service for managing menu items.
+service MenuItemService {
+  // rpc to get menu items by category ID
+  rpc GetMenuItemsByCategoryId(Id) returns (MenuItemList) {}
+  // rpc to get a menu item by its ID
+  rpc GetMenuItemById(Id) returns (MenuItem) {}
+  // rpc to create a new menu item
+  rpc CreateMenuItem(CreateMenuItemRequest) returns (MenuItem) {}
+  // rpc to update an existing menu item
+  rpc UpdateMenuItem(UpdateMenuItemRequest) returns (MenuItem) {}
+  // rpc to change the position of a menu item
+  rpc ChangeMenuItemPosition(ChangeMenuItemPositionRequest) returns (MenuItem) {}
+  // rpc to delete a menu item by its ID
+  rpc DeleteMenuItem(Id) returns (StatusResponse) {}
+}
+
+// MenuItem represents a menu item with its details.
+message MenuItem {
+  string id = 1;
+  string language = 2;
+  string title = 3;
+  optional string description = 4;
+  string price = 5;
+  optional string image_url = 6;
+  bool is_available = 7;
+  int32 position = 8;
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp updated_at = 10;
+  Id menu_category = 11;
+}
+
+// declaration of Id message
+message Id {
+  string id = 1;
+}
+
+// MenuItemList represents a list of menu items.
+message MenuItemList {
+  repeated MenuItem menu_items = 1;
+}
+
+// Request message for creating a menu item.
+message CreateMenuItemRequest {
+  string language = 1;
+  string title = 2;
+  optional string description = 3;
+  string price = 4;
+  optional string image_url = 5;
+  optional bool is_available = 6;
+  Id menu_category = 7;
+}
+// Request message for updating a menu item.
+message UpdateMenuItemRequest {
+  string id = 1;
+  optional string language = 2;
+  optional string title = 3;
+  optional string description = 4;
+  optional string price = 5;
+  optional string image_url = 6;
+  optional bool is_available = 7;
+  Id menu_category = 8;
+}
+
+// Request message for changing the position of a menu item.
+message ChangeMenuItemPositionRequest {
+  string id = 1;
+  int32 position = 2;
+}
+
+// StatusResponse represents a standard response message indicating success or failure.
+message StatusResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Command to generate TypeScript code with NestJS options
+// protoc -I ./proto ./proto/menu-item.proto --ts_proto_out=./src/generated-types --ts_proto_opt=nestJs=true
+
+// Command to generate TypeScript code with NestJS options, using null for optional fields and Date for timestamps
+// protoc -I ./proto ./proto/menu-item.proto --ts_proto_out=./src/generated-types --ts_proto_opt=nestJs=true --ts_proto_opt=useNullAsOptional=true --ts_proto_opt=useDate=true
