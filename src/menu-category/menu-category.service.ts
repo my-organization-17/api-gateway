@@ -10,8 +10,8 @@ import {
   MenuCategoryListWithItems,
   MenuCategoryServiceClient,
   StatusResponse,
-  UpdateMenuCategoryRequest,
 } from 'src/generated-types/menu-category';
+import { UpdateMenuCategoryDto } from './dto/update-menu-category.dto';
 
 @Injectable()
 export class MenuCategoryService implements OnModuleInit {
@@ -64,10 +64,10 @@ export class MenuCategoryService implements OnModuleInit {
       throw error;
     }
   }
-  updateMenuCategory(data: UpdateMenuCategoryRequest): Observable<MenuCategory> {
-    this.logger.log(`Updating menu category with data: ${JSON.stringify(data)}`);
+  updateMenuCategory(id: string, data: UpdateMenuCategoryDto): Observable<MenuCategory> {
+    this.logger.log(`Updating menu category with ID: ${id} and data: ${JSON.stringify(data)}`);
     try {
-      return this.menuCategoryService.updateMenuCategory(data);
+      return this.menuCategoryService.updateMenuCategory({ id, ...data });
     } catch (error) {
       this.logger.error(`Failed to update menu category: ${(error as Error).message || 'Unknown error'}`);
       throw error;
