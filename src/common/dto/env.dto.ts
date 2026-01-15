@@ -9,4 +9,8 @@ export class EnvironmentVariables {
   @IsString()
   @IsNotEmpty()
   readonly MENU_MICROSERVICE_GRPC_URL: string;
+
+  @IsString()
+  @IsNotEmpty()
+  readonly USER_MICROSERVICE_GRPC_URL: string;
 }
