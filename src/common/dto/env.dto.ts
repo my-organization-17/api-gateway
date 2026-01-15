@@ -13,4 +13,12 @@ export class EnvironmentVariables {
   @IsString()
   @IsNotEmpty()
   readonly USER_MICROSERVICE_GRPC_URL: string;
+
+  @IsString()
+  @IsNotEmpty()
+  readonly COOKIE_SECRET: string;
+
+  @IsString()
+  @IsNotEmpty()
+  readonly COOKIE_DOMAIN: string;
 }
