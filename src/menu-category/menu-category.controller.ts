@@ -11,15 +11,14 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Observable } from 'rxjs';
 
 import { Language } from 'src/common/enums';
-import { Roles } from 'src/auth/decorators/roles.decorator';
-import { JwtAuthGuard, RolesGuard } from 'src/auth/guards';
+import { Protected } from 'src/auth/decorators';
 import { UserRole } from 'src/generated-types/user';
+
 import { PositionDto } from '../common/dto/position.dto';
 import { MenuCategoryService } from './menu-category.service';
 import { CreateMenuCategoryDto } from './dto/create-menu-category.dto';
@@ -29,8 +28,7 @@ import type { MenuCategory, MenuCategoryList, StatusResponse } from 'src/generat
 
 @ApiTags('menu-category')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(UserRole.ADMIN, UserRole.MODERATOR)
+@Protected(UserRole.ADMIN, UserRole.MODERATOR)
 @Controller('menu-category')
 export class MenuCategoryController {
   constructor(private readonly menuCategoryService: MenuCategoryService) {}

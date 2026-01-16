@@ -1,10 +1,10 @@
 import { CanActivate, ExecutionContext, Injectable, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Request } from 'express';
+import type { Request } from 'express';
 
 import { UserResponseDto } from 'src/common/dto/user.response.dto';
 import { ROLES_KEY } from '../decorators/roles.decorator';
-import { UserRole } from 'src/generated-types/user';
+import type { UserRole } from 'src/generated-types/user';
 
 interface RequestWithUser extends Request {
   user?: UserResponseDto;

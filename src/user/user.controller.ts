@@ -2,13 +2,13 @@ import { Controller, Get, Logger, Param, ParseUUIDPipe, UseInterceptors } from '
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Observable } from 'rxjs';
 
-import { Authenticated, UserId } from 'src/auth/decorators';
+import { Protected, UserId } from 'src/auth/decorators';
 import { UserResponseDto } from '../common/dto/user.response.dto';
 import { SerializeInterceptor } from '../utils/serialize.interceptor';
 import { UserService } from './user.service';
 
 @ApiTags('user')
-@Authenticated()
+@Protected()
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
