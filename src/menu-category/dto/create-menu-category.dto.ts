@@ -1,7 +1,7 @@
 import { IsBoolean, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-import { Language } from 'src/common/types/language.enum';
+import { Language } from 'src/common/enums/language.enum';
 
 export class CreateMenuCategoryDto {
   @ApiProperty({

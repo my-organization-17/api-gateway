@@ -32,6 +32,7 @@ export class AuthController {
   ) {}
   protected readonly logger = new Logger(AuthController.name);
 
+  // User Sign-Up
   @UseInterceptors(new SerializeInterceptor(UserResponseDto))
   @Post('signup')
   @ApiOperation({
@@ -49,6 +50,7 @@ export class AuthController {
     return this.authService.signUp(data);
   }
 
+  // Verify Email
   @UseInterceptors(new SerializeInterceptor(AuthResponseDto))
   @Post('verify-email')
   @ApiOperation({
@@ -85,6 +87,7 @@ export class AuthController {
     );
   }
 
+  // User Sign-In
   @UseInterceptors(new SerializeInterceptor(AuthResponseDto))
   @Post('signin')
   @ApiOperation({
@@ -117,6 +120,7 @@ export class AuthController {
     );
   }
 
+  // Refresh Tokens
   @Post('refresh-tokens')
   @ApiOperation({
     summary: 'Refresh Tokens',
@@ -151,6 +155,7 @@ export class AuthController {
     );
   }
 
+  // User Logout
   @Post('logout')
   @ApiOperation({
     summary: 'User Logout',

@@ -27,7 +27,7 @@ export class SignUpRequestDto {
   @ApiPropertyOptional({
     description: 'User name',
     type: String,
-    example: 'kotykhin_d',
+    example: 'Dmytro',
     minLength: 2,
     maxLength: 30,
   })
@@ -39,7 +39,7 @@ export class SignUpRequestDto {
   @ApiPropertyOptional({
     description: 'User phone number',
     type: String,
-    example: '+1234567890',
+    example: '+380501234567',
   })
   @IsOptional()
   @IsString()

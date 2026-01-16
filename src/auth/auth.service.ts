@@ -4,13 +4,13 @@ import { Observable } from 'rxjs';
 
 import {
   AUTH_SERVICE_NAME,
-  AuthResponse,
-  AuthServiceClient,
-  RefreshTokensResponse,
-  SignInRequest,
-  SignUpRequest,
+  type AuthResponse,
+  type AuthServiceClient,
+  type RefreshTokensResponse,
+  type SignInRequest,
+  type SignUpRequest,
 } from 'src/generated-types/auth';
-import { User, USER_SERVICE_NAME, UserServiceClient } from 'src/generated-types/user';
+import { type User, USER_SERVICE_NAME, type UserServiceClient } from 'src/generated-types/user';
 
 @Injectable()
 export class AuthService implements OnModuleInit {

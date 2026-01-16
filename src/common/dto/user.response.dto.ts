@@ -1,31 +1,33 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { Expose } from 'class-transformer';
+import { Expose, Transform } from 'class-transformer';
+import { UserRole } from 'src/generated-types/user';
 
 export class UserResponseDto {
   @Expose()
-  id: string;
+  readonly id: string;
 
   @Expose()
-  email: string;
+  readonly email: string;
 
   @Expose()
-  role: string;
+  @Transform(({ value }) => UserRole[value as keyof typeof UserRole])
+  readonly role: UserRole;
 
   @Expose()
-  isEmailVerified: boolean;
+  readonly isEmailVerified: boolean;
 
   @Expose()
-  isBanned: boolean;
-
-  @ApiPropertyOptional()
-  @Expose()
-  name?: string | null;
+  readonly isBanned: boolean;
 
   @ApiPropertyOptional()
   @Expose()
-  phoneNumber?: string | null;
+  readonly name?: string | null;
 
   @ApiPropertyOptional()
   @Expose()
-  avatarUrl?: string | null;
+  readonly phoneNumber?: string | null;
+
+  @ApiPropertyOptional()
+  @Expose()
+  readonly avatarUrl?: string | null;
 }

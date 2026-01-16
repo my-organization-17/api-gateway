@@ -21,4 +21,8 @@ export class EnvironmentVariables {
   @IsString()
   @IsNotEmpty()
   readonly COOKIE_DOMAIN: string;
+
+  @IsString()
+  @IsNotEmpty()
+  readonly JWT_ACCESS_SECRET: string;
 }

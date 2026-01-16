@@ -6,14 +6,14 @@ import { UserResponseDto } from 'src/common/dto/user.response.dto';
 export class AuthResponseDto {
   @Expose()
   @ApiProperty()
-  accessToken: string;
+  readonly accessToken: string;
 
   @Expose()
   @ApiProperty()
-  refreshToken?: string;
+  readonly refreshToken?: string;
 
   @Expose()
   @Type(() => UserResponseDto)
   @ApiProperty({ type: () => UserResponseDto })
-  user: UserResponseDto | null;
+  readonly user: UserResponseDto | null;
 }

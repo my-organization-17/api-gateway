@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 
 import { MenuCategoryService } from './menu-category.service';
 import type { MenuCategoryListWithItems } from 'src/generated-types/menu-category';
-import { Language } from 'src/common/types/language.enum';
+import { Language } from 'src/common/enums/language.enum';
 
 @ApiTags('full-menu')
 @Controller('full-menu')

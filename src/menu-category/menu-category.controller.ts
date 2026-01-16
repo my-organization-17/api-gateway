@@ -11,18 +11,26 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Observable } from 'rxjs';
 
+import { Language } from 'src/common/enums';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { JwtAuthGuard, RolesGuard } from 'src/auth/guards';
+import { UserRole } from 'src/generated-types/user';
+import { PositionDto } from '../common/dto/position.dto';
 import { MenuCategoryService } from './menu-category.service';
-import type { MenuCategory, MenuCategoryList, StatusResponse } from 'src/generated-types/menu-category';
-import { Language } from 'src/common/types/language.enum';
 import { CreateMenuCategoryDto } from './dto/create-menu-category.dto';
 import { UpdateMenuCategoryDto } from './dto/update-menu-category.dto';
-import { PositionDto } from '../common/dto/position.dto';
+
+import type { MenuCategory, MenuCategoryList, StatusResponse } from 'src/generated-types/menu-category';
 
 @ApiTags('menu-category')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.ADMIN, UserRole.MODERATOR)
 @Controller('menu-category')
 export class MenuCategoryController {
   constructor(private readonly menuCategoryService: MenuCategoryService) {}
