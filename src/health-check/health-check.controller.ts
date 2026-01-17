@@ -65,20 +65,13 @@ export class HealthCheckController {
   })
   async checkHealth(): Promise<HealthCheckResponse> {
     this.logger.log('Health check requested at API Gateway');
-    const { appHealth: menuAppHealth, dbHealth: menuDbHealth } =
-      await this.healthCheckService.checkMenuMicroserviceHealth();
-    const { appHealth: userAppHealth, dbHealth: userDbHealth } =
-      await this.healthCheckService.checkUserMicroserviceHealth();
+
+    const menuMicroservice = await this.healthCheckService.checkMenuMicroserviceHealth();
+    const userMicroservice = await this.healthCheckService.checkUserMicroserviceHealth();
 
     return {
-      menuMicroservice: {
-        appHealth: menuAppHealth,
-        dbHealth: menuDbHealth,
-      },
-      userMicroservice: {
-        appHealth: userAppHealth,
-        dbHealth: userDbHealth,
-      },
+      menuMicroservice,
+      userMicroservice,
     };
   }
 }

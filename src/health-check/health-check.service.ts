@@ -4,6 +4,11 @@ import { firstValueFrom } from 'rxjs';
 
 import { HEALTH_CHECK_SERVICE_NAME, HealthCheckServiceClient } from 'src/generated-types/health-check';
 
+interface ServiceResponse {
+  serving: boolean;
+  message: string;
+}
+
 @Injectable()
 export class HealthCheckService implements OnModuleInit {
   private menuHealthCheckService: HealthCheckServiceClient;
@@ -24,11 +29,13 @@ export class HealthCheckService implements OnModuleInit {
       this.userMicroserviceClient.getService<HealthCheckServiceClient>(HEALTH_CHECK_SERVICE_NAME);
   }
 
-  async checkMenuMicroserviceHealth() {
+  async checkMenuMicroserviceHealth(): Promise<{ appHealth: ServiceResponse; dbHealth: ServiceResponse }> {
     this.logger.log('Checking Menu microservice health...');
     try {
-      const appHealth = await firstValueFrom(this.menuHealthCheckService.checkAppHealth({}));
-      const dbHealth = await firstValueFrom(this.menuHealthCheckService.checkDatabaseConnection({}));
+      const [appHealth, dbHealth] = await Promise.all([
+        firstValueFrom(this.menuHealthCheckService.checkAppHealth({})),
+        firstValueFrom(this.menuHealthCheckService.checkDatabaseConnection({})),
+      ]);
       return { appHealth, dbHealth };
     } catch (error) {
       this.logger.error(`Menu microservice health check failed: ${(error as Error).message || 'Unknown error'}`);
@@ -39,11 +46,13 @@ export class HealthCheckService implements OnModuleInit {
     }
   }
 
-  async checkUserMicroserviceHealth() {
+  async checkUserMicroserviceHealth(): Promise<{ appHealth: ServiceResponse; dbHealth: ServiceResponse }> {
     this.logger.log('Checking User microservice health...');
     try {
-      const appHealth = await firstValueFrom(this.userHealthCheckService.checkAppHealth({}));
-      const dbHealth = await firstValueFrom(this.userHealthCheckService.checkDatabaseConnection({}));
+      const [appHealth, dbHealth] = await Promise.all([
+        firstValueFrom(this.userHealthCheckService.checkAppHealth({})),
+        firstValueFrom(this.userHealthCheckService.checkDatabaseConnection({})),
+      ]);
       return { appHealth, dbHealth };
     } catch (error) {
       this.logger.error(`User microservice health check failed: ${(error as Error).message || 'Unknown error'}`);
