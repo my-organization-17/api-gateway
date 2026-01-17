@@ -2,12 +2,11 @@ import { CanActivate, ExecutionContext, Injectable, ForbiddenException } from '@
 import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
 
-import { UserResponseDto } from 'src/common/dto/user.response.dto';
 import { ROLES_KEY } from '../decorators/roles.decorator';
-import type { UserRole } from 'src/generated-types/user';
+import { type User, UserRole } from 'src/generated-types/user';
 
 interface RequestWithUser extends Request {
-  user?: UserResponseDto;
+  user?: User;
 }
 
 @Injectable()
@@ -24,7 +23,7 @@ export class RolesGuard implements CanActivate {
 
     const { user } = context.switchToHttp().getRequest<RequestWithUser>();
 
-    if (!user?.role) {
+    if (user?.role === undefined) {
       throw new ForbiddenException('Role not found');
     }
 

@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { USER_V1_PACKAGE_NAME } from 'src/generated-types/user';
 import { AUTH_V1_PACKAGE_NAME } from 'src/generated-types/auth';
 import { UserService } from './user.service';
+import { AdminController } from './admin.controller';
 import { UserController } from './user.controller';
 
 @Module({
@@ -24,7 +25,7 @@ import { UserController } from './user.controller';
       },
     ]),
   ],
-  controllers: [UserController],
+  controllers: [AdminController, UserController],
   providers: [UserService],
 })
 export class UserModule {}
