@@ -21,6 +21,18 @@ import { HEALTH_CHECK_V1_PACKAGE_NAME } from 'src/generated-types/health-check';
         }),
         inject: [ConfigService],
       },
+      {
+        name: 'USER_HEALTH_CHECK_MICROSERVICE',
+        useFactory: (configService: ConfigService) => ({
+          transport: Transport.GRPC,
+          options: {
+            url: configService.getOrThrow<string>('USER_MICROSERVICE_GRPC_URL'),
+            package: HEALTH_CHECK_V1_PACKAGE_NAME,
+            protoPath: 'proto/health-check.proto',
+          },
+        }),
+        inject: [ConfigService],
+      },
     ]),
   ],
   controllers: [HealthCheckController],
