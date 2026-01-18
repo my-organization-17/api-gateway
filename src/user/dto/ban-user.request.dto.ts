@@ -1,6 +1,6 @@
-import { Optional } from '@nestjs/common';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDate, IsString, IsUUID } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsDate, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class BanUserRequestDto {
   @ApiProperty()
@@ -8,7 +8,7 @@ export class BanUserRequestDto {
   readonly id: string;
 
   @ApiPropertyOptional({ description: 'Reason for banning the user', type: String, nullable: true })
-  @Optional()
+  @IsOptional()
   @IsString()
   readonly reason?: string | null;
 
@@ -18,7 +18,8 @@ export class BanUserRequestDto {
     format: 'date-time',
     nullable: true,
   })
-  @Optional()
+  @IsOptional()
+  @Type(() => Date)
   @IsDate()
   readonly banUntil?: Date | null;
 }

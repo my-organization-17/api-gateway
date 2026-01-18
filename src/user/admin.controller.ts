@@ -3,7 +3,7 @@ import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/s
 import { map, Observable } from 'rxjs';
 
 import { Protected, UserId } from 'src/auth/decorators';
-import { BanDetailsResponse, UserRole } from 'src/generated-types/user';
+import { BanDetailsResponse, GetBannedUsersResponse, UserRole } from 'src/generated-types/user';
 import { SerializeInterceptor } from '../utils/serialize.interceptor';
 import { UserService } from './user.service';
 import { FullUserResponseDto } from './dto/full-user.response.dto';
@@ -122,8 +122,10 @@ export class AdminController {
   getBannedUsers(@UserId() adminId: string): Observable<FullUserResponseDto[]> {
     this.logger.log(`Admin ${adminId} requested the list of all banned users`);
     return this.userService.getBannedUsers().pipe(
-      // Assuming GetBannedUsersResponse has a 'users' property which is an array of User
-      map((response) => response.users),
+      map((response: GetBannedUsersResponse) => {
+        this.logger.log(`Fetched ${response.users?.length ?? 0} banned users`);
+        return response.users;
+      }),
     );
   }
 
