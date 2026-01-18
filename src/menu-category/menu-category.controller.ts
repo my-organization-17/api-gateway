@@ -19,7 +19,7 @@ import { Language } from 'src/common/enums';
 import { Protected } from 'src/auth/decorators';
 import { UserRole } from 'src/generated-types/user';
 
-import { PositionDto } from '../common/dto/position.dto';
+import { PositionRequestDto } from '../common/dto/position.request.dto';
 import { MenuCategoryService } from './menu-category.service';
 import { CreateMenuCategoryDto } from './dto/create-menu-category.dto';
 import { UpdateMenuCategoryDto } from './dto/update-menu-category.dto';
@@ -147,7 +147,7 @@ export class MenuCategoryController {
   })
   changeMenuCategoryPosition(
     @Param('id', new ParseUUIDPipe()) id: string,
-    @Body() { position }: PositionDto,
+    @Body() { position }: PositionRequestDto,
   ): Observable<MenuCategory> {
     this.logger.log(`Received request to change position of menu category with ID: ${id} to position: ${position}`);
     return this.menuCategoryService.changeMenuCategoryPosition(id, position);

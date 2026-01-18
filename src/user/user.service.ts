@@ -3,14 +3,16 @@ import { ClientGrpc } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
 
 import {
-  BanUserRequest,
   USER_SERVICE_NAME,
   UserRole,
-  UserRoleRequest,
+  type BanDetailsResponse,
+  type BanUserRequest,
+  type GetBannedUsersResponse,
   type PasswordRequest,
   type StatusResponse,
   type UpdateUserRequest,
   type User,
+  type UserRoleRequest,
   type UserServiceClient,
 } from 'src/generated-types/user';
 
@@ -96,12 +98,34 @@ export class UserService implements OnModuleInit {
     }
   }
 
-  unbanUser(id: string): Observable<User> {
-    this.logger.log(`Unbanning user with ID: ${id}`);
+  unbanUser(data: BanUserRequest): Observable<User> {
+    this.logger.log(`Unbanning user with ID: ${data.id}`);
     try {
-      return this.userService.unbanUser({ id });
+      return this.userService.unbanUser(data);
     } catch (error) {
-      this.logger.error(`Failed to unban user with ID ${id}: ${(error as Error).message || 'Unknown error'}`);
+      this.logger.error(`Failed to unban user with ID ${data.id}: ${(error as Error).message || 'Unknown error'}`);
+      throw error;
+    }
+  }
+
+  getBannedUsers(): Observable<GetBannedUsersResponse> {
+    this.logger.log(`Fetching all banned users`);
+    try {
+      return this.userService.getBannedUsers({});
+    } catch (error) {
+      this.logger.error(`Failed to fetch banned users: ${(error as Error).message || 'Unknown error'}`);
+      throw error;
+    }
+  }
+
+  getBanDetailsByUserId(id: string): Observable<BanDetailsResponse> {
+    this.logger.log(`Fetching ban details for user ID: ${id}`);
+    try {
+      return this.userService.getBanDetailsByUserId({ id });
+    } catch (error) {
+      this.logger.error(
+        `Failed to fetch ban details for user ID ${id}: ${(error as Error).message || 'Unknown error'}`,
+      );
       throw error;
     }
   }

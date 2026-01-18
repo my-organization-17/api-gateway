@@ -2,7 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Expose, Transform } from 'class-transformer';
 import { UserRole } from 'src/generated-types/user';
 
-export class AdminResponseDto {
+export class FullUserResponseDto {
   @Expose()
   readonly id: string;
 
@@ -34,14 +34,6 @@ export class AdminResponseDto {
   @ApiPropertyOptional()
   @Expose()
   readonly lastLogin?: Date | null;
-
-  @ApiPropertyOptional()
-  @Expose()
-  readonly bannedAt?: Date | null;
-
-  @ApiPropertyOptional()
-  @Expose()
-  readonly banReason?: string | null;
 
   @ApiProperty()
   @Expose()

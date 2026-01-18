@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, Length, Matches } from 'class-validator';
 
-export class PasswordDto {
+export class PasswordRequestDto {
   @ApiProperty({
     description: 'User Password',
     type: String,

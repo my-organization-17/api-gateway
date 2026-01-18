@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Logger, Param, ParseUUIDPipe, Post, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Logger, Param, ParseUUIDPipe, Post, UseInterceptors } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Observable } from 'rxjs';
 
@@ -6,8 +6,8 @@ import { Protected, UserId } from 'src/auth/decorators';
 import { UserResponseDto } from '../common/dto/user.response.dto';
 import { SerializeInterceptor } from '../utils/serialize.interceptor';
 import { UserService } from './user.service';
-import { UserUpdateDto } from './dto/user.update.dto';
-import { PasswordDto } from './dto/password.dto';
+import { UserUpdateRequestDto } from './dto/user.update.request.dto';
+import { PasswordRequestDto } from './dto/password.request.dto';
 
 import type { StatusResponse } from 'src/generated-types/user';
 
@@ -70,13 +70,13 @@ export class UserController {
     type: UserResponseDto,
     description: 'Returns the updated user details',
   })
-  updateUser(@UserId() userId: string, @Body() data: UserUpdateDto): Observable<UserResponseDto> {
+  updateUser(@UserId() userId: string, @Body() data: UserUpdateRequestDto): Observable<UserResponseDto> {
     this.logger.log(`Received request to update user with ID: ${userId}`);
     return this.userService.updateUser({ id: userId, ...data });
   }
 
   // Delete user
-  @Post('/delete')
+  @Delete('/delete')
   @ApiOperation({
     summary: 'Delete user',
     description: 'Deletes the currently authenticated user',
@@ -96,12 +96,12 @@ export class UserController {
     summary: 'Confirm password',
     description: 'Confirms the password of the currently authenticated user',
   })
-  @ApiBody({ type: PasswordDto })
+  @ApiBody({ type: PasswordRequestDto })
   @ApiResponse({
     status: 200,
     description: 'Password successfully confirmed',
   })
-  confirmPassword(@UserId() userId: string, @Body() data: PasswordDto): Observable<StatusResponse> {
+  confirmPassword(@UserId() userId: string, @Body() data: PasswordRequestDto): Observable<StatusResponse> {
     this.logger.log(`Received request to confirm password for user ID: ${userId}`);
     return this.userService.confirmPassword({ id: userId, ...data });
   }
@@ -112,12 +112,12 @@ export class UserController {
     summary: 'Change password',
     description: 'Changes the password of the currently authenticated user',
   })
-  @ApiBody({ type: PasswordDto })
+  @ApiBody({ type: PasswordRequestDto })
   @ApiResponse({
     status: 200,
     description: 'Password successfully changed',
   })
-  changePassword(@UserId() userId: string, @Body() data: PasswordDto): Observable<StatusResponse> {
+  changePassword(@UserId() userId: string, @Body() data: PasswordRequestDto): Observable<StatusResponse> {
     this.logger.log(`Received request to change password for user ID: ${userId}`);
     return this.userService.changePassword({ id: userId, ...data });
   }
