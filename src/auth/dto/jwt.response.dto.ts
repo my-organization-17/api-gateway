@@ -10,4 +10,7 @@ export class JwtResponseDto {
 
   @ApiProperty()
   readonly role: UserRole;
+
+  @ApiProperty()
+  readonly sid?: string;
 }

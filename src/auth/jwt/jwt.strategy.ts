@@ -17,6 +17,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   validate(payload: JwtPayload): JwtResponseDto {
-    return { id: payload.sub, isBanned: payload.isBanned, role: payload.role };
+    return { id: payload.sub, isBanned: payload.isBanned, role: payload.role, sid: payload.sid };
   }
 }
