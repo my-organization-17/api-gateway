@@ -10,7 +10,7 @@ import {
   type SignInRequest,
   type SignUpRequest,
 } from 'src/generated-types/auth';
-import { type User, USER_SERVICE_NAME, type UserServiceClient } from 'src/generated-types/user';
+import { USER_SERVICE_NAME, type StatusResponse, type User, type UserServiceClient } from 'src/generated-types/user';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
@@ -34,6 +34,16 @@ export class AuthService implements OnModuleInit {
       return this.authService.signUp(data);
     } catch (error) {
       this.logger.error(`Failed to sign up user: ${(error as Error).message || 'Unknown error'}`);
+      throw error;
+    }
+  }
+
+  resendConfirmationEmail(email: string): Observable<StatusResponse> {
+    this.logger.log(`Resending confirmation email to: ${email}`);
+    try {
+      return this.authService.resendConfirmationEmail({ email });
+    } catch (error) {
+      this.logger.error(`Failed to resend confirmation email: ${(error as Error).message || 'Unknown error'}`);
       throw error;
     }
   }
@@ -64,6 +74,36 @@ export class AuthService implements OnModuleInit {
       return this.authService.refreshTokens({ token: refreshToken });
     } catch (error) {
       this.logger.error(`Failed to refresh tokens: ${(error as Error).message || 'Unknown error'}`);
+      throw error;
+    }
+  }
+
+  initResetPassword(email: string): Observable<StatusResponse> {
+    this.logger.log(`Initiating reset password for email: ${email}`);
+    try {
+      return this.authService.initResetPassword({ email });
+    } catch (error) {
+      this.logger.error(`Failed to initiate reset password: ${(error as Error).message || 'Unknown error'}`);
+      throw error;
+    }
+  }
+
+  resendResetPasswordEmail(email: string): Observable<StatusResponse> {
+    this.logger.log(`Resending reset password email to: ${email}`);
+    try {
+      return this.authService.resendResetPasswordEmail({ email });
+    } catch (error) {
+      this.logger.error(`Failed to resend reset password email: ${(error as Error).message || 'Unknown error'}`);
+      throw error;
+    }
+  }
+
+  setNewPassword(token: string, password: string): Observable<StatusResponse> {
+    this.logger.log(`Setting new password with token: ${token}`);
+    try {
+      return this.authService.setNewPassword({ token, password });
+    } catch (error) {
+      this.logger.error(`Failed to set new password: ${(error as Error).message || 'Unknown error'}`);
       throw error;
     }
   }

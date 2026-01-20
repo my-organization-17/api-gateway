@@ -16,12 +16,11 @@ import { map, tap } from 'rxjs/operators';
 import { Request, Response } from 'express';
 
 import { SerializeInterceptor } from 'src/utils/serialize.interceptor';
-import { UserResponseDto } from 'src/common/dto/user.response.dto';
+import { PasswordRequestDto, UserResponseDto } from 'src/common/dto';
+import { AuthResponseDto, EmailRequestDto, SignInRequestDto, SignUpRequestDto, TokenResponseDto } from './dto';
 import { AuthService } from './auth.service';
-import { SignUpRequestDto } from './dto/signup.request.dto';
-import { AuthResponseDto } from './dto/auth.response.dto';
-import { TokenResponseDto } from './dto/token.response.dto';
-import { SignInRequestDto } from './dto/signin.request.dto';
+
+import type { StatusResponse } from 'src/generated-types/user';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -48,6 +47,22 @@ export class AuthController {
   public signUp(@Body() data: SignUpRequestDto): Observable<UserResponseDto> {
     this.logger.log('Received sign-up request');
     return this.authService.signUp(data);
+  }
+
+  // Resend Confirmation Email
+  @Post('resend-confirmation-email')
+  @ApiOperation({
+    summary: 'Resend Confirmation Email',
+    description: 'Resends the email confirmation link to the specified email address',
+  })
+  @ApiBody({ type: EmailRequestDto })
+  @ApiResponse({
+    status: 200,
+    description: 'The confirmation email has been successfully resent',
+  })
+  public resendConfirmationEmail(@Body() { email }: EmailRequestDto): Observable<StatusResponse> {
+    this.logger.log(`Received request to resend confirmation email to: ${email}`);
+    return this.authService.resendConfirmationEmail(email);
   }
 
   // Verify Email
@@ -173,5 +188,61 @@ export class AuthController {
       domain: this.configService.get<string>('COOKIE_DOMAIN'),
       sameSite: 'lax',
     });
+  }
+
+  // Initiate Reset Password
+  @Post('init-reset-password')
+  @ApiOperation({
+    summary: 'Initiate Reset Password',
+    description: 'Sends a password reset email to the specified email address',
+  })
+  @ApiBody({ type: EmailRequestDto })
+  @ApiResponse({
+    status: 200,
+    description: 'The password reset email has been successfully sent',
+  })
+  public initResetPassword(@Body() { email }: EmailRequestDto): Observable<StatusResponse> {
+    this.logger.log(`Received request to initiate password reset for email: ${email}`);
+    return this.authService.initResetPassword(email);
+  }
+
+  // Resend Reset Password Email
+  @Post('resend-reset-password-email')
+  @ApiOperation({
+    summary: 'Resend Reset Password Email',
+    description: 'Resends the password reset email to the specified email address',
+  })
+  @ApiBody({ type: EmailRequestDto })
+  @ApiResponse({
+    status: 200,
+    description: 'The password reset email has been successfully resent',
+  })
+  public resendResetPasswordEmail(@Body() { email }: EmailRequestDto): Observable<StatusResponse> {
+    this.logger.log(`Received request to resend password reset email to: ${email}`);
+    return this.authService.resendResetPasswordEmail(email);
+  }
+
+  // Set New Password
+  @Post('set-new-password')
+  @ApiOperation({
+    summary: 'Set New Password',
+    description: 'Sets a new password using the provided token and password',
+  })
+  @ApiQuery({
+    name: 'token',
+    required: true,
+    description: 'The password reset token',
+  })
+  @ApiBody({ type: PasswordRequestDto })
+  @ApiResponse({
+    status: 200,
+    description: 'The password has been successfully updated',
+  })
+  public setNewPassword(
+    @Query('token') token: string,
+    @Body() { password }: PasswordRequestDto,
+  ): Observable<StatusResponse> {
+    this.logger.log('Received request to set new password');
+    return this.authService.setNewPassword(token, password);
   }
 }

@@ -3,11 +3,10 @@ import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/s
 import { map, Observable } from 'rxjs';
 
 import { Protected, UserId } from 'src/auth/decorators';
-import { BanDetailsResponse, GetBannedUsersResponse, UserRole } from 'src/generated-types/user';
+import { type BanDetailsResponse, type GetBannedUsersResponse, UserRole } from 'src/generated-types/user';
 import { SerializeInterceptor } from '../utils/serialize.interceptor';
+import { BanUserRequestDto, FullUserResponseDto } from './dto';
 import { UserService } from './user.service';
-import { FullUserResponseDto } from './dto/full-user.response.dto';
-import { BanUserRequestDto } from './dto/ban-user.request.dto';
 
 @ApiTags('admin')
 @Protected(UserRole.ADMIN)

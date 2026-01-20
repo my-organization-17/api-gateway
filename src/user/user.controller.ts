@@ -3,11 +3,10 @@ import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/s
 import { Observable } from 'rxjs';
 
 import { Protected, UserId } from 'src/auth/decorators';
-import { UserResponseDto } from '../common/dto/user.response.dto';
+import { PasswordRequestDto, UserResponseDto } from '../common/dto';
 import { SerializeInterceptor } from '../utils/serialize.interceptor';
+import { UserUpdateRequestDto } from './dto';
 import { UserService } from './user.service';
-import { UserUpdateRequestDto } from './dto/user.update.request.dto';
-import { PasswordRequestDto } from './dto/password.request.dto';
 
 import type { StatusResponse } from 'src/generated-types/user';
 
