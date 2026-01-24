@@ -3,6 +3,7 @@ import { ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 
 import { HEALTH_CHECK_SERVICE_NAME, HealthCheckServiceClient } from 'src/generated-types/health-check';
+import { MessageBrokerService } from 'src/transport/message-broker/message-broker.service';
 
 interface ServiceResponse {
   serving: boolean;
@@ -20,6 +21,7 @@ export class HealthCheckService implements OnModuleInit {
     private readonly menuMicroserviceClient: ClientGrpc,
     @Inject('USER_HEALTH_CHECK_MICROSERVICE')
     private readonly userMicroserviceClient: ClientGrpc,
+    private readonly messageBrokerService: MessageBrokerService,
   ) {}
 
   onModuleInit() {
@@ -60,6 +62,18 @@ export class HealthCheckService implements OnModuleInit {
         appHealth: { serving: false, message: 'User microservice app is unavailable' },
         dbHealth: { serving: false, message: 'User microservice database is unavailable' },
       };
+    }
+  }
+
+  async checkNotificationMicroserviceHealth(): Promise<ServiceResponse> {
+    this.logger.log('Checking Notification microservice health...');
+    try {
+      return await firstValueFrom(this.messageBrokerService.sendMessage<object, ServiceResponse>('health.check', {}));
+    } catch (error) {
+      this.logger.error(
+        `Notification microservice health check failed: ${(error as Error).message || 'Unknown error'}`,
+      );
+      return { serving: false, message: 'Notification microservice app is unavailable' };
     }
   }
 }

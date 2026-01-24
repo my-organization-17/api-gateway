@@ -17,6 +17,7 @@ interface HealthCheckResponse {
     appHealth: ServiceResponse;
     dbHealth: ServiceResponse;
   };
+  notificationMicroservice: ServiceResponse;
 }
 
 @ApiTags('health-check')
@@ -46,6 +47,7 @@ export class HealthCheckController {
             appHealth: { serving: true, message: 'User microservice app is healthy' },
             dbHealth: { serving: true, message: 'User microservice database is healthy' },
           },
+          notificationMicroservice: { serving: true, message: 'Notification microservice app is healthy' },
         },
       },
       example2: {
@@ -59,6 +61,7 @@ export class HealthCheckController {
             appHealth: { serving: false, message: 'User microservice app is unavailable' },
             dbHealth: { serving: false, message: 'User microservice database is unavailable' },
           },
+          notificationMicroservice: { serving: false, message: 'Notification microservice app is unavailable' },
         },
       },
     },
@@ -68,10 +71,12 @@ export class HealthCheckController {
 
     const menuMicroservice = await this.healthCheckService.checkMenuMicroserviceHealth();
     const userMicroservice = await this.healthCheckService.checkUserMicroserviceHealth();
+    const notificationMicroservice = await this.healthCheckService.checkNotificationMicroserviceHealth();
 
     return {
       menuMicroservice,
       userMicroservice,
+      notificationMicroservice,
     };
   }
 }

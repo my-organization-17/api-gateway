@@ -25,4 +25,12 @@ export class EnvironmentVariables {
   @IsString()
   @IsNotEmpty()
   readonly JWT_ACCESS_SECRET: string;
+
+  @IsString()
+  @IsNotEmpty()
+  readonly RABBITMQ_URL: string;
+
+  @IsString()
+  @IsNotEmpty()
+  readonly RABBITMQ_QUEUE: string;
 }

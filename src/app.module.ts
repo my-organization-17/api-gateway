@@ -8,6 +8,7 @@ import { validateEnv } from './utils/env-validator';
 import { EnvironmentVariables } from './common/dto';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
+import { MessageBrokerModule } from './transport/message-broker/message-broker.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { AuthModule } from './auth/auth.module';
       ttl: 10 * 1000, // 10 seconds
     }),
     HealthCheckModule,
+    MessageBrokerModule,
     MenuCategoryModule,
     UserModule,
     AuthModule,
