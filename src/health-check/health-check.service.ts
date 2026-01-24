@@ -68,7 +68,9 @@ export class HealthCheckService implements OnModuleInit {
   async checkNotificationMicroserviceHealth(): Promise<ServiceResponse> {
     this.logger.log('Checking Notification microservice health...');
     try {
-      return await firstValueFrom(this.messageBrokerService.sendMessage<object, ServiceResponse>('health.check', {}));
+      return await firstValueFrom(
+        this.messageBrokerService.sendMessage<object, ServiceResponse>('health.check', {}, 3000),
+      );
     } catch (error) {
       this.logger.error(
         `Notification microservice health check failed: ${(error as Error).message || 'Unknown error'}`,
