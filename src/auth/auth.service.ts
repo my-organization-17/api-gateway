@@ -10,11 +10,10 @@ import {
   type SignInRequest,
   type SignUpRequest,
 } from 'src/generated-types/auth';
-import { USER_SERVICE_NAME, type StatusResponse, type User, type UserServiceClient } from 'src/generated-types/user';
+import type { StatusResponse, User } from 'src/generated-types/user';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
-  private userService: UserServiceClient;
   private authService: AuthServiceClient;
   protected readonly logger = new Logger(AuthService.name);
 
@@ -24,7 +23,6 @@ export class AuthService implements OnModuleInit {
   ) {}
 
   onModuleInit() {
-    this.userService = this.userMicroserviceClient.getService<UserServiceClient>(USER_SERVICE_NAME);
     this.authService = this.userMicroserviceClient.getService<AuthServiceClient>(AUTH_SERVICE_NAME);
   }
 

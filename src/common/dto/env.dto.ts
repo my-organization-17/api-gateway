@@ -1,4 +1,4 @@
-import { IsInt, IsNotEmpty, IsString, Max } from 'class-validator';
+import { IsInt, IsNotEmpty, IsString, IsUrl, Max } from 'class-validator';
 
 export class EnvironmentVariables {
   @IsInt()
@@ -18,7 +18,7 @@ export class EnvironmentVariables {
   @IsNotEmpty()
   readonly COOKIE_SECRET: string;
 
-  @IsString()
+  @IsUrl({ require_tld: false }, { message: 'COOKIE_DOMAIN must be a valid URL' })
   @IsNotEmpty()
   readonly COOKIE_DOMAIN: string;
 
@@ -26,7 +26,7 @@ export class EnvironmentVariables {
   @IsNotEmpty()
   readonly JWT_ACCESS_SECRET: string;
 
-  @IsString()
+  @IsUrl({ protocols: ['amqp', 'amqps'], require_tld: false }, { message: 'RABBITMQ_URL must be a valid AMQP URL' })
   @IsNotEmpty()
   readonly RABBITMQ_URL: string;
 

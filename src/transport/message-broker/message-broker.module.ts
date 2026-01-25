@@ -1,6 +1,7 @@
 import { Global, Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
+
 import { MessageBrokerService } from './message-broker.service';
 
 @Global()
