@@ -5,7 +5,6 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 
 import { AUTH_V1_PACKAGE_NAME } from 'src/generated-types/auth';
-import { USER_V1_PACKAGE_NAME } from 'src/generated-types/user';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './jwt/jwt.strategy';
@@ -14,13 +13,13 @@ import { JwtStrategy } from './jwt/jwt.strategy';
   imports: [
     ClientsModule.registerAsync([
       {
-        name: 'USER_MICROSERVICE',
+        name: 'AUTH_CLIENT',
         useFactory: (configService: ConfigService) => ({
           transport: Transport.GRPC,
           options: {
             url: configService.getOrThrow<string>('USER_MICROSERVICE_GRPC_URL'),
-            package: [AUTH_V1_PACKAGE_NAME, USER_V1_PACKAGE_NAME],
-            protoPath: ['proto/auth.proto', 'proto/user.proto'],
+            package: [AUTH_V1_PACKAGE_NAME],
+            protoPath: ['proto/auth.proto'],
           },
         }),
         inject: [ConfigService],

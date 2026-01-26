@@ -18,12 +18,12 @@ export class AuthService implements OnModuleInit {
   protected readonly logger = new Logger(AuthService.name);
 
   constructor(
-    @Inject('USER_MICROSERVICE')
-    private readonly userMicroserviceClient: ClientGrpc,
+    @Inject('AUTH_CLIENT')
+    private readonly authMicroserviceClient: ClientGrpc,
   ) {}
 
   onModuleInit() {
-    this.authService = this.userMicroserviceClient.getService<AuthServiceClient>(AUTH_SERVICE_NAME);
+    this.authService = this.authMicroserviceClient.getService<AuthServiceClient>(AUTH_SERVICE_NAME);
   }
 
   signUp(data: SignUpRequest): Observable<User> {

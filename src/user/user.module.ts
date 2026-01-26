@@ -1,30 +1,13 @@
 import { Module } from '@nestjs/common';
-import { ClientsModule, Transport } from '@nestjs/microservices';
-import { ConfigService } from '@nestjs/config';
+import { ClientsModule } from '@nestjs/microservices';
 
-import { USER_V1_PACKAGE_NAME } from 'src/generated-types/user';
-import { AUTH_V1_PACKAGE_NAME } from 'src/generated-types/auth';
+import { GrpcConfig } from 'src/configs/grpc.config';
 import { UserService } from './user.service';
 import { AdminController } from './admin.controller';
 import { UserController } from './user.controller';
 
 @Module({
-  imports: [
-    ClientsModule.registerAsync([
-      {
-        name: 'USER_MICROSERVICE',
-        useFactory: (configService: ConfigService) => ({
-          transport: Transport.GRPC,
-          options: {
-            url: configService.getOrThrow<string>('USER_MICROSERVICE_GRPC_URL'),
-            package: [AUTH_V1_PACKAGE_NAME, USER_V1_PACKAGE_NAME],
-            protoPath: ['proto/auth.proto', 'proto/user.proto'],
-          },
-        }),
-        inject: [ConfigService],
-      },
-    ]),
-  ],
+  imports: [ClientsModule.registerAsync([GrpcConfig.userClientOptions()])],
   controllers: [AdminController, UserController],
   providers: [UserService],
 })

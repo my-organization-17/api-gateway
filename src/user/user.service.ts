@@ -22,7 +22,7 @@ export class UserService implements OnModuleInit {
   protected readonly logger = new Logger(UserService.name);
 
   constructor(
-    @Inject('USER_MICROSERVICE')
+    @Inject('USER_CLIENT')
     private readonly userMicroserviceClient: ClientGrpc,
   ) {}
 

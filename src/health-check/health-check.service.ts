@@ -17,9 +17,9 @@ export class HealthCheckService implements OnModuleInit {
   protected readonly logger = new Logger(HealthCheckService.name);
 
   constructor(
-    @Inject('MENU_HEALTH_CHECK_MICROSERVICE')
+    @Inject('MENU_HEALTH_CHECK_CLIENT')
     private readonly menuMicroserviceClient: ClientGrpc,
-    @Inject('USER_HEALTH_CHECK_MICROSERVICE')
+    @Inject('USER_HEALTH_CHECK_CLIENT')
     private readonly userMicroserviceClient: ClientGrpc,
     private readonly messageBrokerService: MessageBrokerService,
   ) {}

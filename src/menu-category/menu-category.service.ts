@@ -19,7 +19,7 @@ export class MenuCategoryService implements OnModuleInit {
   protected readonly logger = new Logger(MenuCategoryService.name);
 
   constructor(
-    @Inject('MENU_CATEGORY_MICROSERVICE')
+    @Inject('MENU_CATEGORY_CLIENT')
     private readonly menuCategoryMicroserviceClient: ClientGrpc,
   ) {}
 
