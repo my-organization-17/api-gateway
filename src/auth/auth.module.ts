@@ -1,30 +1,16 @@
 import { Module } from '@nestjs/common';
-import { ClientsModule, Transport } from '@nestjs/microservices';
-import { ConfigService } from '@nestjs/config';
+import { ClientsModule } from '@nestjs/microservices';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 
-import { AUTH_V1_PACKAGE_NAME } from 'src/generated-types/auth';
+import { GrpcConfig } from 'src/configs/grpc.config';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './jwt/jwt.strategy';
 
 @Module({
   imports: [
-    ClientsModule.registerAsync([
-      {
-        name: 'AUTH_CLIENT',
-        useFactory: (configService: ConfigService) => ({
-          transport: Transport.GRPC,
-          options: {
-            url: configService.getOrThrow<string>('USER_MICROSERVICE_GRPC_URL'),
-            package: [AUTH_V1_PACKAGE_NAME],
-            protoPath: ['proto/auth.proto'],
-          },
-        }),
-        inject: [ConfigService],
-      },
-    ]),
+    ClientsModule.registerAsync([GrpcConfig.authClientOptions()]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({}),
   ],

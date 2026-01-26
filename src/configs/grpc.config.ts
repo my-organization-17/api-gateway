@@ -3,6 +3,8 @@ import { ConfigService } from '@nestjs/config';
 
 import { HEALTH_CHECK_V1_PACKAGE_NAME } from 'src/generated-types/health-check';
 import { MENU_CATEGORY_V1_PACKAGE_NAME } from 'src/generated-types/menu-category';
+import { MENU_ITEM_V1_PACKAGE_NAME } from 'src/generated-types/menu-item';
+import { AUTH_V1_PACKAGE_NAME } from 'src/generated-types/auth';
 import { USER_V1_PACKAGE_NAME } from 'src/generated-types/user';
 
 export class GrpcConfig {
@@ -49,11 +51,29 @@ export class GrpcConfig {
     });
   }
 
+  static authClientOptions(): ClientsProviderAsyncOptions {
+    return GrpcConfig.createGrpcClientOptions({
+      serviceName: 'AUTH_CLIENT',
+      protoPath: 'proto/auth.proto',
+      packageName: AUTH_V1_PACKAGE_NAME,
+      urlConfigKey: 'USER_MICROSERVICE_GRPC_URL',
+    });
+  }
+
   static menuCategoryClientOptions(): ClientsProviderAsyncOptions {
     return GrpcConfig.createGrpcClientOptions({
       serviceName: 'MENU_CATEGORY_CLIENT',
       protoPath: 'proto/menu-category.proto',
       packageName: MENU_CATEGORY_V1_PACKAGE_NAME,
+      urlConfigKey: 'MENU_MICROSERVICE_GRPC_URL',
+    });
+  }
+
+  static menuItemClientOptions(): ClientsProviderAsyncOptions {
+    return GrpcConfig.createGrpcClientOptions({
+      serviceName: 'MENU_ITEM_CLIENT',
+      protoPath: 'proto/menu-item.proto',
+      packageName: MENU_ITEM_V1_PACKAGE_NAME,
       urlConfigKey: 'MENU_MICROSERVICE_GRPC_URL',
     });
   }
