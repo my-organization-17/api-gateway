@@ -32,7 +32,6 @@ message MenuItem {
   int32 position = 8;
   google.protobuf.Timestamp created_at = 9;
   google.protobuf.Timestamp updated_at = 10;
-  Id menu_category = 11;
 }
 
 // declaration of Id message
