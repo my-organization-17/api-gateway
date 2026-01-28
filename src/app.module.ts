@@ -9,6 +9,7 @@ import { EnvironmentVariables } from './common/dto';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { MessageBrokerModule } from './transport/message-broker/message-broker.module';
+import { MenuItemModule } from './menu-item/menu-item.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { MessageBrokerModule } from './transport/message-broker/message-broker.m
     MenuCategoryModule,
     UserModule,
     AuthModule,
+    MenuItemModule,
   ],
   controllers: [],
   providers: [],

@@ -3,13 +3,13 @@ import { ClientGrpc } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
 
 import {
-  CreateMenuCategoryRequest,
+  type CreateMenuCategoryRequest,
   MENU_CATEGORY_SERVICE_NAME,
-  MenuCategory,
-  MenuCategoryList,
-  MenuCategoryListWithItems,
-  MenuCategoryServiceClient,
-  StatusResponse,
+  type MenuCategory,
+  type MenuCategoryList,
+  type MenuCategoryListWithItems,
+  type MenuCategoryServiceClient,
+  type StatusResponse,
 } from 'src/generated-types/menu-category';
 import { UpdateMenuCategoryDto } from './dto/update-menu-category.dto';
 

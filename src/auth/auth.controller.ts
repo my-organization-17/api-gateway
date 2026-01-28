@@ -53,7 +53,7 @@ export class AuthController {
   @Post('resend-confirmation-email')
   @ApiOperation({
     summary: 'Resend Confirmation Email',
-    description: 'Resends the email confirmation link to the specified email address',
+    description: 'Resend the email confirmation link to the specified email address',
   })
   @ApiBody({ type: EmailRequestDto })
   @ApiResponse({
