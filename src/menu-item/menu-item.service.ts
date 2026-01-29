@@ -25,9 +25,7 @@ export class MenuItemService implements OnModuleInit {
   getMenuItemsByCategoryId(id: string): Observable<MenuItemList> {
     this.logger.log(`Fetching menu items for category ID: ${id}`);
     try {
-      const menuItemList = this.menuItemService.getMenuItemsByCategoryId({ id });
-      console.log('Menu items fetched:', menuItemList);
-      return menuItemList;
+      return this.menuItemService.getMenuItemsByCategoryId({ id });
     } catch (error) {
       this.logger.error(`Failed to fetch menu items: ${(error as Error).message || 'Unknown error'}`);
       throw error;

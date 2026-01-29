@@ -1,9 +1,15 @@
-import { Body, Controller, Get, Logger, Param, ParseUUIDPipe, Post, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Logger, Param, ParseUUIDPipe, Post, Query, UseInterceptors } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { map, Observable } from 'rxjs';
 
 import { Protected, UserId } from 'src/auth/decorators';
-import { type BanDetailsResponse, type GetBannedUsersResponse, UserRole } from 'src/generated-types/user';
+import {
+  type AllUsersResponse,
+  type BanDetailsResponse,
+  type GetBannedUsersResponse,
+  type PaginationMeta,
+  UserRole,
+} from 'src/generated-types/user';
 import { SerializeInterceptor } from '../utils/serialize.interceptor';
 import { BanUserRequestDto, FullUserResponseDto } from './dto';
 import { UserService } from './user.service';
@@ -39,6 +45,22 @@ export class AdminController {
   ): Observable<FullUserResponseDto> {
     this.logger.log(`Admin ${adminId} requested info for user with ID: ${id}`);
     return this.userService.getUserById(id);
+  }
+
+  // Get all users with pagination
+  @Get('users')
+  @ApiOperation({
+    summary: 'Get all users',
+    description: 'Fetches a list of all users with pagination',
+  })
+  @ApiResponse({
+    status: 200,
+    type: [FullUserResponseDto],
+    description: 'Returns a list of users',
+  })
+  getAllUsers(@Query() query: PaginationMeta, @UserId() adminId: string): Observable<AllUsersResponse> {
+    this.logger.log(`Admin ${adminId} requested the list of all users`);
+    return this.userService.getAllUsers(query);
   }
 
   // Ban a user by their unique ID

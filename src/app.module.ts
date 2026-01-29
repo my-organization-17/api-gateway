@@ -10,6 +10,7 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { MessageBrokerModule } from './transport/message-broker/message-broker.module';
 import { MenuItemModule } from './menu-item/menu-item.module';
+import { MetricsModule } from './supervision/metrics/metrics.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { MenuItemModule } from './menu-item/menu-item.module';
     UserModule,
     AuthModule,
     MenuItemModule,
+    MetricsModule,
   ],
   controllers: [],
   providers: [],

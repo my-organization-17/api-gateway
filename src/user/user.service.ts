@@ -5,9 +5,11 @@ import { Observable } from 'rxjs';
 import {
   USER_SERVICE_NAME,
   UserRole,
+  type AllUsersResponse,
   type BanDetailsResponse,
   type BanUserRequest,
   type GetBannedUsersResponse,
+  type PaginationMeta,
   type PasswordRequest,
   type StatusResponse,
   type UpdateUserRequest,
@@ -36,6 +38,16 @@ export class UserService implements OnModuleInit {
       return this.userService.getUserById({ id });
     } catch (error) {
       this.logger.error(`Failed to fetch user by ID: ${(error as Error).message || 'Unknown error'}`);
+      throw error;
+    }
+  }
+
+  getAllUsers(data: PaginationMeta): Observable<AllUsersResponse> {
+    this.logger.log(`Fetching all users with page: ${data.page}, limit: ${data.limit}`);
+    try {
+      return this.userService.getAllUsers(data);
+    } catch (error) {
+      this.logger.error(`Failed to fetch all users: ${(error as Error).message || 'Unknown error'}`);
       throw error;
     }
   }
