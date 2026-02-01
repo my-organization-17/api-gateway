@@ -44,7 +44,7 @@ export class AdminController {
     @UserId() adminId: string,
   ): Observable<FullUserResponseDto> {
     this.logger.log(`Admin ${adminId} requested info for user with ID: ${id}`);
-    return this.userService.getUserById(id);
+    return this.userService.getUserById(id, id);
   }
 
   // Get all users with pagination

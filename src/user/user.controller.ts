@@ -31,7 +31,7 @@ export class UserController {
   })
   getProfile(@UserId() userId: string): Observable<UserResponseDto> {
     this.logger.log('Received request to get user profile');
-    return this.userService.getUserById(userId);
+    return this.userService.getUserById(userId, userId);
   }
 
   // Get a user by their unique ID
@@ -52,9 +52,12 @@ export class UserController {
     type: UserResponseDto,
     description: 'Returns the user corresponding to the provided ID',
   })
-  getUserById(@Param('id', new ParseUUIDPipe()) id: string): Observable<UserResponseDto> {
+  getUserById(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @UserId() currentUserId: string,
+  ): Observable<UserResponseDto> {
     this.logger.log(`Received request to get user by ID: ${id}`);
-    return this.userService.getUserById(id);
+    return this.userService.getUserById(id, currentUserId);
   }
 
   // Update user

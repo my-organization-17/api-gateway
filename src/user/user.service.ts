@@ -32,9 +32,13 @@ export class UserService implements OnModuleInit {
     this.userService = this.userMicroserviceClient.getService<UserServiceClient>(USER_SERVICE_NAME);
   }
 
-  getUserById(id: string): Observable<User> {
+  getUserById(id: string, currentUserId: string): Observable<User> {
     this.logger.log(`Fetching user by ID: ${id}`);
     try {
+      if (id !== currentUserId) {
+        this.logger.warn(`User ID mismatch: requested ID ${id} does not match current user ID ${currentUserId}`);
+        throw new BadRequestException('You can only fetch your own user profile.');
+      }
       return this.userService.getUserById({ id });
     } catch (error) {
       this.logger.error(`Failed to fetch user by ID: ${(error as Error).message || 'Unknown error'}`);
