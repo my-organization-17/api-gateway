@@ -21,6 +21,10 @@ export class HttpMetricsInterceptor implements NestInterceptor {
     const service = 'api-gateway';
     const route = (request.route as { path?: string } | undefined)?.path || request.path || 'unknown';
 
+    if (route === '/metrics') {
+      return next.handle();
+    }
+
     const end = this.httpRequestDurationSeconds.startTimer({
       service,
       method,
