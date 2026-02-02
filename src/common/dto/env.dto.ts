@@ -1,6 +1,10 @@
 import { IsInt, IsNotEmpty, IsString, IsUrl, Max } from 'class-validator';
 
 export class EnvironmentVariables {
+  @IsString()
+  @IsNotEmpty()
+  readonly NODE_ENV: string;
+
   @IsInt()
   @IsNotEmpty()
   @Max(65535)

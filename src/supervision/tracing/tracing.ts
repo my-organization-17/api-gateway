@@ -29,11 +29,11 @@ export const sdk = new NodeSDK({
 // Initialize the SDK and start tracing
 export const initTracing = (): void => {
   sdk.start();
-  logger.log('Tracing initialized', 'TracingService');
+  logger.log('Tracing initialized');
 };
 
 // Shutdown the SDK and flush traces
 export const shutdownTracing = async (): Promise<void> => {
   await sdk.shutdown();
-  logger.log('Tracing terminated', 'TracingService');
+  logger.log('Tracing terminated');
 };
