@@ -1,3 +1,8 @@
+import { initTracing } from './supervision/tracing/tracing';
+
+// Initialize tracing BEFORE any other imports to ensure proper instrumentation
+initTracing();
+
 import { NestFactory } from '@nestjs/core';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
