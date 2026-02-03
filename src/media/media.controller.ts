@@ -9,7 +9,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { UserId } from 'src/auth/decorators/user-id.decorator';
 import { Protected } from 'src/auth/decorators';
@@ -27,6 +27,7 @@ export class MediaController {
     summary: 'Upload user avatar',
     description: 'Uploads an avatar image for the authenticated user',
   })
+  @ApiConsumes('multipart/form-data')
   @ApiBody({
     description: 'Avatar image file',
     schema: {

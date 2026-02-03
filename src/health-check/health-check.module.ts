@@ -7,7 +7,11 @@ import { HealthCheckController } from './health-check.controller';
 
 @Module({
   imports: [
-    ClientsModule.registerAsync([GrpcConfig.menuHealthCheckClientOptions(), GrpcConfig.userHealthCheckClientOptions()]),
+    ClientsModule.registerAsync([
+      GrpcConfig.menuHealthCheckClientOptions(),
+      GrpcConfig.userHealthCheckClientOptions(),
+      GrpcConfig.mediaHealthCheckClientOptions(),
+    ]),
   ],
   controllers: [HealthCheckController],
   providers: [HealthCheckService],

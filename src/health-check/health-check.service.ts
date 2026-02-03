@@ -14,6 +14,7 @@ interface ServiceResponse {
 export class HealthCheckService implements OnModuleInit {
   private menuHealthCheckService: HealthCheckServiceClient;
   private userHealthCheckService: HealthCheckServiceClient;
+  private mediaHealthCheckService: HealthCheckServiceClient;
   protected readonly logger = new Logger(HealthCheckService.name);
 
   constructor(
@@ -21,6 +22,8 @@ export class HealthCheckService implements OnModuleInit {
     private readonly menuMicroserviceClient: ClientGrpc,
     @Inject('USER_HEALTH_CHECK_CLIENT')
     private readonly userMicroserviceClient: ClientGrpc,
+    @Inject('MEDIA_HEALTH_CHECK_CLIENT')
+    private readonly mediaMicroserviceClient: ClientGrpc,
     private readonly messageBrokerService: MessageBrokerService,
   ) {}
 
@@ -29,6 +32,8 @@ export class HealthCheckService implements OnModuleInit {
       this.menuMicroserviceClient.getService<HealthCheckServiceClient>(HEALTH_CHECK_SERVICE_NAME);
     this.userHealthCheckService =
       this.userMicroserviceClient.getService<HealthCheckServiceClient>(HEALTH_CHECK_SERVICE_NAME);
+    this.mediaHealthCheckService =
+      this.mediaMicroserviceClient.getService<HealthCheckServiceClient>(HEALTH_CHECK_SERVICE_NAME);
   }
 
   async checkMenuMicroserviceHealth(): Promise<{ appHealth: ServiceResponse; dbHealth: ServiceResponse }> {
@@ -76,6 +81,19 @@ export class HealthCheckService implements OnModuleInit {
         `Notification microservice health check failed: ${(error as Error).message || 'Unknown error'}`,
       );
       return { serving: false, message: 'Notification microservice app is unavailable' };
+    }
+  }
+
+  async checkMediaMicroserviceHealth(): Promise<{ appHealth: ServiceResponse }> {
+    this.logger.log('Checking Media microservice health...');
+    try {
+      const appHealth = await firstValueFrom(this.mediaHealthCheckService.checkAppHealth({}));
+      return { appHealth };
+    } catch (error) {
+      this.logger.error(`Media microservice health check failed: ${(error as Error).message || 'Unknown error'}`);
+      return {
+        appHealth: { serving: false, message: 'Media microservice app is unavailable' },
+      };
     }
   }
 }

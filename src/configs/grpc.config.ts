@@ -51,6 +51,15 @@ export class GrpcConfig {
     });
   }
 
+  static mediaHealthCheckClientOptions(): ClientsProviderAsyncOptions {
+    return GrpcConfig.createGrpcClientOptions({
+      serviceName: 'MEDIA_HEALTH_CHECK_CLIENT',
+      protoPath: 'proto/health-check.proto',
+      packageName: HEALTH_CHECK_V1_PACKAGE_NAME,
+      urlConfigKey: 'MEDIA_MICROSERVICE_GRPC_URL',
+    });
+  }
+
   static authClientOptions(): ClientsProviderAsyncOptions {
     return GrpcConfig.createGrpcClientOptions({
       serviceName: 'AUTH_CLIENT',

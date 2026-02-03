@@ -20,6 +20,10 @@ export class EnvironmentVariables {
 
   @IsString()
   @IsNotEmpty()
+  readonly MEDIA_MICROSERVICE_GRPC_URL: string;
+
+  @IsString()
+  @IsNotEmpty()
   readonly COOKIE_SECRET: string;
 
   @IsUrl({ require_tld: false }, { message: 'COOKIE_DOMAIN must be a valid URL' })
