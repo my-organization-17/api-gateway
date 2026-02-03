@@ -13,13 +13,13 @@ import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { UserId } from 'src/auth/decorators/user-id.decorator';
 import { Protected } from 'src/auth/decorators';
-import { FileService } from './file.service';
+import { MediaService } from './media.service';
 
-@ApiTags('file')
+@ApiTags('media')
 @Protected()
-@Controller('file')
-export class FileController {
-  constructor(private readonly fileService: FileService) {}
+@Controller('media')
+export class MediaController {
+  constructor(private readonly mediaService: MediaService) {}
 
   @Post('upload-avatar')
   @UseInterceptors(FileInterceptor('avatar'))
@@ -58,7 +58,7 @@ export class FileController {
     file: Express.Multer.File,
     @UserId() userId: string,
   ) {
-    this.fileService.uploadAvatar(file, userId);
+    this.mediaService.uploadAvatar(file, userId);
   }
 
   @Delete('remove-avatar')
@@ -71,6 +71,6 @@ export class FileController {
     description: 'Avatar removed successfully',
   })
   removeAvatar(@UserId() userId: string) {
-    this.fileService.removeAvatar(userId);
+    this.mediaService.removeAvatar(userId);
   }
 }

@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 
 @Injectable()
-export class FileService {
-  protected readonly logger = new Logger(FileService.name);
+export class MediaService {
+  protected readonly logger = new Logger(MediaService.name);
 
   uploadAvatar(file: Express.Multer.File, userId: string): void {
     this.logger.log(`Uploading avatar for user ID: ${userId}`);
