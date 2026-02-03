@@ -11,6 +11,7 @@ import { AuthModule } from './auth/auth.module';
 import { MessageBrokerModule } from './transport/message-broker/message-broker.module';
 import { MenuItemModule } from './menu-item/menu-item.module';
 import { MetricsModule } from './supervision/metrics/metrics.module';
+import { FileModule } from './file/file.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { MetricsModule } from './supervision/metrics/metrics.module';
     AuthModule,
     MenuItemModule,
     MetricsModule,
+    FileModule,
   ],
   controllers: [],
   providers: [],
