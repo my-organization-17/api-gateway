@@ -1,98 +1,298 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# CoffeeDoor API Gateway
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Central entry point for the CoffeeDoor microservices ecosystem. This service handles authentication, authorization, request routing, and provides observability features for all downstream microservices.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Technology Stack
 
-## Description
+- **Framework**: NestJS v11
+- **Language**: TypeScript 5.7
+- **Runtime**: Node.js 24
+- **RPC Protocol**: gRPC (for microservice communication)
+- **Message Queue**: RabbitMQ (for async notifications)
+- **Authentication**: JWT with Passport.js
+- **Observability**: Prometheus metrics + OpenTelemetry/Jaeger tracing
+- **API Documentation**: Swagger/OpenAPI
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Project Structure
 
-## Project setup
-
-```bash
-$ npm install
+```
+api-gateway/
+├── src/
+│   ├── auth/                    # Authentication module (signup, signin, tokens)
+│   ├── user/                    # User profile & admin management
+│   ├── menu-category/           # Menu category CRUD operations
+│   ├── menu-item/               # Menu item management
+│   ├── media/                   # File upload (avatars)
+│   ├── health-check/            # Microservices health monitoring
+│   ├── supervision/
+│   │   ├── metrics/             # Prometheus metrics collection
+│   │   └── tracing/             # OpenTelemetry/Jaeger tracing
+│   ├── transport/
+│   │   └── message-broker/      # RabbitMQ integration
+│   ├── common/                  # Shared DTOs and enums
+│   ├── configs/                 # gRPC client configuration
+│   ├── utils/                   # Interceptors, filters, helpers
+│   └── generated-types/         # Auto-generated protobuf types
+├── proto/                       # Protocol buffer definitions
+├── test/                        # E2E tests
+├── Dockerfile
+└── docker-compose.yml
 ```
 
-## Compile and run the project
+## Connected Microservices
 
-```bash
-# development
-$ npm run start
+| Service | Protocol | Purpose |
+|---------|----------|---------|
+| User Microservice | gRPC | Authentication, user management |
+| Menu Microservice | gRPC | Menu categories and items |
+| Media Microservice | gRPC | File storage operations |
+| Notification Microservice | RabbitMQ | Email notifications |
 
-# watch mode
-$ npm run start:dev
+## Environment Variables
 
-# production mode
-$ npm run start:prod
+Create a `.env` file based on `.env.example`:
+
+```env
+# Server
+NODE_ENV=development
+HTTP_PORT=4004
+
+# gRPC Microservices
+MENU_MICROSERVICE_GRPC_URL=0.0.0.0:5001
+USER_MICROSERVICE_GRPC_URL=0.0.0.0:5002
+MEDIA_MICROSERVICE_GRPC_URL=0.0.0.0:5003
+
+# Cookie Configuration
+COOKIE_SECRET=your_cookie_secret_key_here
+COOKIE_DOMAIN=localhost
+
+# JWT
+JWT_ACCESS_SECRET=your_jwt_access_secret_key
+
+# RabbitMQ
+RABBITMQ_URL=amqp://user:password@localhost:5672
+RABBITMQ_QUEUE=notification_queue
 ```
 
-## Run tests
+## Installation
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm install
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Running the Service
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+# Development (watch mode)
+npm run start:dev
+
+# Production build
+npm run build
+npm run start:prod
+
+# Debug mode
+npm run start:debug
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Docker
 
-## Resources
+```bash
+# Build image
+docker build -t api-gateway .
 
-Check out a few resources that may come in handy when working with NestJS:
+# Run with docker-compose
+docker-compose up
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## API Endpoints
 
-## Support
+### Authentication (`/auth`)
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/auth/signup` | No | Register new user |
+| POST | `/auth/signin` | No | Login user |
+| POST | `/auth/verify-email?token=` | No | Verify email address |
+| POST | `/auth/resend-confirmation-email` | No | Resend verification email |
+| POST | `/auth/refresh-tokens` | Cookie | Refresh JWT tokens |
+| POST | `/auth/logout` | JWT | Clear refresh token |
+| POST | `/auth/init-reset-password` | No | Initiate password reset |
+| POST | `/auth/resend-reset-password-email` | No | Resend password reset email |
+| POST | `/auth/set-new-password?token=` | No | Set new password |
 
-## Stay in touch
+### User (`/user`)
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/user/me` | JWT | Get own profile |
+| GET | `/user/:id` | JWT | Get user by ID |
+| POST | `/user/update` | JWT | Update profile |
+| DELETE | `/user/delete` | JWT | Delete account |
+| POST | `/user/confirm-password` | JWT | Verify password |
+| POST | `/user/change-password` | JWT | Change password |
+
+### Admin (`/admin`)
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/admin/users` | ADMIN | List all users (paginated) |
+| GET | `/admin/user/:id` | ADMIN | Get user details |
+| POST | `/admin/ban` | ADMIN | Ban user |
+| POST | `/admin/unban` | ADMIN | Unban user |
+| POST | `/admin/change-role/:id` | ADMIN | Change user role |
+| GET | `/admin/banned-users` | ADMIN | List banned users |
+| GET | `/admin/ban-details/:id` | ADMIN | Get ban info |
+
+### Menu Category (`/menu-category`)
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/menu-category?language=` | ADMIN/MOD | Get categories by language (EN, UA, RU) |
+| GET | `/menu-category/:id` | ADMIN/MOD | Get category details |
+| POST | `/menu-category/create` | ADMIN/MOD | Create category |
+| PATCH | `/menu-category/update/:id` | ADMIN/MOD | Update category |
+| PATCH | `/menu-category/change-position/:id` | ADMIN/MOD | Reorder category |
+| DELETE | `/menu-category/:id` | ADMIN/MOD | Delete category |
+
+### Menu Item (`/menu-item`)
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/menu-item?categoryId=` | ADMIN/MOD | Get items by category |
+| GET | `/menu-item/:id` | ADMIN/MOD | Get item details |
+
+### Media (`/media`)
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/media/upload-avatar` | JWT | Upload avatar (max 1MB, JPEG/PNG/GIF/WebP) |
+| DELETE | `/media/remove-avatar` | JWT | Remove avatar |
+
+### Health & Monitoring
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/health-check` | No | Check all microservices status |
+| GET | `/metrics` | No | Prometheus metrics |
+| GET | `/docs` | No | Swagger API documentation |
+
+## Authentication & Authorization
+
+### JWT Strategy
+- Access tokens via `Authorization: Bearer <token>` header
+- Refresh tokens via HTTP-only cookies
+
+### Custom Decorators
+
+```typescript
+// Require JWT authentication
+@Protected()
+
+// Require specific roles
+@Protected(UserRole.ADMIN)
+@Protected(UserRole.ADMIN, UserRole.MODERATOR)
+
+// Extract user ID from token
+@UserId() userId: string
+```
+
+### Guards
+
+- **JwtAuthGuard**: Validates JWT tokens
+- **RolesGuard**: Enforces role-based access control
+
+## Observability
+
+### Prometheus Metrics
+
+Available at `GET /metrics`:
+
+- `http_request_duration_seconds` - Request latency histogram
+- `http_active_requests` - Current active requests gauge
+- `http_requests_total` - Total request counter
+
+Labels: `service`, `method`, `route`, `status_code`
+
+### Distributed Tracing
+
+OpenTelemetry integration with Jaeger exporter for request tracing across microservices.
+
+## Error Handling
+
+gRPC errors are automatically mapped to HTTP status codes:
+
+| gRPC Code | HTTP Status |
+|-----------|-------------|
+| CANCELLED (1) | 422 Unprocessable Entity |
+| INVALID_ARGUMENT (3) | 400 Bad Request |
+| DEADLINE_EXCEEDED (4) | 504 Gateway Timeout |
+| NOT_FOUND (5) | 404 Not Found |
+| ALREADY_EXISTS (6) | 409 Conflict |
+| PERMISSION_DENIED (7) | 403 Forbidden |
+| RESOURCE_EXHAUSTED (8) | 429 Too Many Requests |
+| UNAUTHENTICATED (16) | 401 Unauthorized |
+
+## Testing
+
+```bash
+# Unit tests
+npm run test
+
+# Watch mode
+npm run test:watch
+
+# Coverage report
+npm run test:cov
+
+# E2E tests
+npm run test:e2e
+```
+
+## Code Quality
+
+```bash
+# Lint
+npm run lint
+
+# Format
+npm run format
+```
+
+## Protocol Buffers
+
+Proto definitions are located in `/proto/`:
+
+- `auth.proto` - Authentication service
+- `user.proto` - User service
+- `menu-category.proto` - Menu category service
+- `menu-item.proto` - Menu item service
+- `health-check.proto` - Health check service
+
+Generated TypeScript types are in `src/generated-types/`.
+
+## Architecture Diagram
+
+```
+┌─────────────┐     HTTP/REST      ┌─────────────────┐
+│   Client    │ ─────────────────► │   API Gateway   │
+└─────────────┘                    │   (Port 4004)   │
+                                   └────────┬────────┘
+                                            │
+                    ┌───────────────────────┼───────────────────────┐
+                    │                       │                       │
+                    ▼ gRPC                  ▼ gRPC                  ▼ RabbitMQ
+           ┌───────────────┐       ┌───────────────┐       ┌───────────────┐
+           │     User      │       │     Menu      │       │ Notification  │
+           │ Microservice  │       │ Microservice  │       │ Microservice  │
+           │  (Port 5002)  │       │  (Port 5001)  │       │   (Queue)     │
+           └───────────────┘       └───────────────┘       └───────────────┘
+                    │                       │
+                    ▼                       ▼
+           ┌───────────────┐       ┌───────────────┐
+           │   Postgresql  │       │   Postgresql  │
+           └───────────────┘       └───────────────┘
+```
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+This project is proprietary software for CoffeeDoor.
