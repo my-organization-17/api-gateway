@@ -55,7 +55,7 @@ Create a `.env` file based on `.env.example`:
 ```env
 # Server
 NODE_ENV=development
-HTTP_PORT=4004
+HTTP_PORT=
 
 # gRPC Microservices
 MENU_MICROSERVICE_GRPC_URL=0.0.0.0:5001
@@ -64,14 +64,14 @@ MEDIA_MICROSERVICE_GRPC_URL=0.0.0.0:5003
 
 # Cookie Configuration
 COOKIE_SECRET=your_cookie_secret_key_here
-COOKIE_DOMAIN=localhost
+COOKIE_DOMAIN=your_domain
 
 # JWT
 JWT_ACCESS_SECRET=your_jwt_access_secret_key
 
 # RabbitMQ
-RABBITMQ_URL=amqp://user:password@localhost:5672
-RABBITMQ_QUEUE=notification_queue
+RABBITMQ_URL=
+RABBITMQ_QUEUE=
 ```
 
 ## Installation
