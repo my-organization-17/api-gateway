@@ -6,6 +6,7 @@ import { MENU_CATEGORY_V1_PACKAGE_NAME } from 'src/generated-types/menu-category
 import { MENU_ITEM_V1_PACKAGE_NAME } from 'src/generated-types/menu-item';
 import { AUTH_V1_PACKAGE_NAME } from 'src/generated-types/auth';
 import { USER_V1_PACKAGE_NAME } from 'src/generated-types/user';
+import { MEDIA_V1_PACKAGE_NAME } from 'src/generated-types/media';
 
 export class GrpcConfig {
   static createGrpcClientOptions({
@@ -93,6 +94,15 @@ export class GrpcConfig {
       protoPath: 'proto/user.proto',
       packageName: USER_V1_PACKAGE_NAME,
       urlConfigKey: 'USER_MICROSERVICE_GRPC_URL',
+    });
+  }
+
+  static mediaClientOptions(): ClientsProviderAsyncOptions {
+    return GrpcConfig.createGrpcClientOptions({
+      serviceName: 'MEDIA_CLIENT',
+      protoPath: 'proto/media.proto',
+      packageName: MEDIA_V1_PACKAGE_NAME,
+      urlConfigKey: 'MEDIA_MICROSERVICE_GRPC_URL',
     });
   }
 }

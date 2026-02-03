@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsPhoneNumber, IsString, Length, MinLength } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsPhoneNumber, IsString, Length } from 'class-validator';
 
 export class UserUpdateRequestDto {
   @ApiPropertyOptional()
@@ -8,13 +8,6 @@ export class UserUpdateRequestDto {
   @IsString()
   @Length(2, 30, { message: 'Name must be at least 2 characters' })
   readonly name?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNotEmpty()
-  @IsString()
-  @MinLength(10)
-  readonly avatarUrl?: string;
 
   @ApiPropertyOptional()
   @IsOptional()

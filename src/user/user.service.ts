@@ -58,9 +58,9 @@ export class UserService implements OnModuleInit {
 
   updateUser(data: UpdateUserRequest): Observable<User> {
     this.logger.log(`Updating user with ID: ${data.id}`);
-    if (!data.name && !data.phoneNumber && !data.avatarUrl) {
+    if (!data.name && !data.phoneNumber) {
       this.logger.warn(`No update fields provided for user ID: ${data.id}`);
-      throw new BadRequestException('At least one field (name, phoneNumber, avatarUrl) must be provided for update.');
+      throw new BadRequestException('At least one field (name, phoneNumber) must be provided for update.');
     }
     try {
       return this.userService.updateUser(data);
