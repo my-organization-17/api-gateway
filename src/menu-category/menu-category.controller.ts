@@ -12,7 +12,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Observable } from 'rxjs';
 
 import { Language } from 'src/common/enums';
@@ -27,7 +27,6 @@ import { UpdateMenuCategoryDto } from './dto/update-menu-category.dto';
 import type { MenuCategory, MenuCategoryList, StatusResponse } from 'src/generated-types/menu-category';
 
 @ApiTags('menu-category')
-@ApiBearerAuth()
 @Protected(UserRole.ADMIN, UserRole.MODERATOR)
 @Controller('menu-category')
 export class MenuCategoryController {
