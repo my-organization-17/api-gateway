@@ -15,6 +15,7 @@ describe('HealthCheckService', () => {
   const menuCheckDatabaseConnectionMock = jest.fn();
   const userCheckAppHealthMock = jest.fn();
   const userCheckDatabaseConnectionMock = jest.fn();
+  const mediaCheckAppHealthMock = jest.fn();
   const sendMessageMock = jest.fn();
 
   beforeEach(async () => {
@@ -22,6 +23,7 @@ describe('HealthCheckService', () => {
     menuCheckDatabaseConnectionMock.mockReturnValue(of(mockHealthyDbResponse));
     userCheckAppHealthMock.mockReturnValue(of(mockHealthyAppResponse));
     userCheckDatabaseConnectionMock.mockReturnValue(of(mockHealthyDbResponse));
+    mediaCheckAppHealthMock.mockReturnValue(of(mockHealthyAppResponse));
     sendMessageMock.mockReturnValue(of(mockNotificationResponse));
 
     const mockMenuHealthCheckService = {
@@ -34,12 +36,20 @@ describe('HealthCheckService', () => {
       checkDatabaseConnection: userCheckDatabaseConnectionMock,
     };
 
+    const mockMediaHealthCheckService = {
+      checkAppHealth: mediaCheckAppHealthMock,
+    };
+
     const mockMenuGrpcClient = {
       getService: jest.fn().mockReturnValue(mockMenuHealthCheckService),
     };
 
     const mockUserGrpcClient = {
       getService: jest.fn().mockReturnValue(mockUserHealthCheckService),
+    };
+
+    const mockMediaGrpcClient = {
+      getService: jest.fn().mockReturnValue(mockMediaHealthCheckService),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -52,6 +62,10 @@ describe('HealthCheckService', () => {
         {
           provide: 'USER_HEALTH_CHECK_CLIENT',
           useValue: mockUserGrpcClient,
+        },
+        {
+          provide: 'MEDIA_HEALTH_CHECK_CLIENT',
+          useValue: mockMediaGrpcClient,
         },
         {
           provide: MessageBrokerService,
@@ -138,6 +152,27 @@ describe('HealthCheckService', () => {
       expect(result).toEqual({
         serving: false,
         message: 'Notification microservice app is unavailable',
+      });
+    });
+  });
+
+  describe('checkMediaMicroserviceHealth', () => {
+    it('should return healthy status when media microservice is available', async () => {
+      const result = await service.checkMediaMicroserviceHealth();
+
+      expect(result).toEqual({
+        appHealth: mockHealthyAppResponse,
+      });
+      expect(mediaCheckAppHealthMock).toHaveBeenCalledWith({});
+    });
+
+    it('should return unhealthy status when media microservice is unavailable', async () => {
+      mediaCheckAppHealthMock.mockReturnValue(throwError(() => new Error('Connection failed')));
+
+      const result = await service.checkMediaMicroserviceHealth();
+
+      expect(result).toEqual({
+        appHealth: { serving: false, message: 'Media microservice app is unavailable' },
       });
     });
   });
