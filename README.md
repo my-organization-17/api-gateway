@@ -210,6 +210,10 @@ Available at `GET /metrics`:
 - `http_request_duration_seconds` - Request latency histogram
 - `http_active_requests` - Current active requests gauge
 - `http_requests_total` - Total request counter
+- `auth_attempts_total` - Total attempts for authentication routes
+- `errors_total` - Total errors in routes
+- `grpc_client_duration_seconds` - Duration of gRPC requests
+- `grpc_client_requests_total` - Total gRPC requests
 
 Labels: `service`, `method`, `route`, `status_code`
 
