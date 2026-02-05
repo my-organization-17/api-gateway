@@ -11,6 +11,9 @@ import {
   type StatusResponse,
   type UpdateMenuItemRequest,
 } from 'src/generated-types/menu-item';
+import { MetricsService } from 'src/supervision/metrics/metrics.service';
+
+const TARGET_SERVICE = 'menu-microservice';
 
 @Injectable()
 export class MenuItemService implements OnModuleInit {
@@ -20,68 +23,52 @@ export class MenuItemService implements OnModuleInit {
   constructor(
     @Inject('MENU_ITEM_CLIENT')
     private readonly menuItemMicroserviceClient: ClientGrpc,
+    private readonly metricsService: MetricsService,
   ) {}
+
   onModuleInit() {
     this.menuItemService = this.menuItemMicroserviceClient.getService<MenuItemServiceClient>(MENU_ITEM_SERVICE_NAME);
   }
 
   getMenuItemsByCategoryId(id: string): Observable<MenuItemList> {
     this.logger.log(`Fetching menu items for category ID: ${id}`);
-    try {
-      return this.menuItemService.getMenuItemsByCategoryId({ id });
-    } catch (error) {
-      this.logger.error(`Failed to fetch menu items: ${(error as Error).message || 'Unknown error'}`);
-      throw error;
-    }
+    return this.menuItemService
+      .getMenuItemsByCategoryId({ id })
+      .pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'getMenuItemsByCategoryId'));
   }
 
   getMenuItemById(id: string): Observable<MenuItem> {
     this.logger.log(`Fetching menu item by ID: ${id}`);
-    try {
-      return this.menuItemService.getMenuItemById({ id });
-    } catch (error) {
-      this.logger.error(`Failed to fetch menu item by ID: ${(error as Error).message || 'Unknown error'}`);
-      throw error;
-    }
+    return this.menuItemService
+      .getMenuItemById({ id })
+      .pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'getMenuItemById'));
   }
 
   createMenuItem(data: CreateMenuItemRequest): Observable<MenuItem> {
     this.logger.log(`Creating new menu item with data: ${JSON.stringify(data)}`);
-    try {
-      return this.menuItemService.createMenuItem(data);
-    } catch (error) {
-      this.logger.error(`Failed to create menu item: ${(error as Error).message || 'Unknown error'}`);
-      throw error;
-    }
+    return this.menuItemService
+      .createMenuItem(data)
+      .pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'createMenuItem'));
   }
 
   updateMenuItem(data: UpdateMenuItemRequest): Observable<MenuItem> {
     this.logger.log(`Updating menu item with data: ${JSON.stringify(data)}`);
-    try {
-      return this.menuItemService.updateMenuItem(data);
-    } catch (error) {
-      this.logger.error(`Failed to update menu item: ${(error as Error).message || 'Unknown error'}`);
-      throw error;
-    }
+    return this.menuItemService
+      .updateMenuItem(data)
+      .pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'updateMenuItem'));
   }
 
   deleteMenuItem(id: string): Observable<StatusResponse> {
     this.logger.log(`Deleting menu item with ID: ${id}`);
-    try {
-      return this.menuItemService.deleteMenuItem({ id });
-    } catch (error) {
-      this.logger.error(`Failed to delete menu item: ${(error as Error).message || 'Unknown error'}`);
-      throw error;
-    }
+    return this.menuItemService
+      .deleteMenuItem({ id })
+      .pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'deleteMenuItem'));
   }
 
   changeMenuItemPosition({ id, position }: { id: string; position: number }): Observable<MenuItem> {
     this.logger.log(`Changing position of menu item ID: ${id} to position: ${position}`);
-    try {
-      return this.menuItemService.changeMenuItemPosition({ id, position });
-    } catch (error) {
-      this.logger.error(`Failed to change menu item position: ${(error as Error).message || 'Unknown error'}`);
-      throw error;
-    }
+    return this.menuItemService
+      .changeMenuItemPosition({ id, position })
+      .pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'changeMenuItemPosition'));
   }
 }

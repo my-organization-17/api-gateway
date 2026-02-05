@@ -10,7 +10,6 @@ import { ConfigService } from '@nestjs/config';
 import * as cookieParser from 'cookie-parser';
 
 import { AppModule } from './app.module';
-import { GrpcExceptionFilter } from './utils/grpc-exception-filter';
 
 const logger = new Logger('Main');
 
@@ -23,7 +22,7 @@ async function bootstrap() {
 
   app.use(cookieParser(configService.get<string>('COOKIE_SECRET')));
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
-  app.useGlobalFilters(new GrpcExceptionFilter());
+  // GrpcExceptionFilter is now provided globally via APP_FILTER in MetricsModule
 
   const config = new DocumentBuilder()
     .setTitle('API Gateway')

@@ -3,6 +3,7 @@ import { ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 
 import { HEALTH_CHECK_SERVICE_NAME, HealthCheckServiceClient } from 'src/generated-types/health-check';
+import { MetricsService } from 'src/supervision/metrics/metrics.service';
 import { MessageBrokerService } from 'src/transport/message-broker/message-broker.service';
 
 interface ServiceResponse {
@@ -25,6 +26,7 @@ export class HealthCheckService implements OnModuleInit {
     @Inject('MEDIA_HEALTH_CHECK_CLIENT')
     private readonly mediaMicroserviceClient: ClientGrpc,
     private readonly messageBrokerService: MessageBrokerService,
+    private readonly metricsService: MetricsService,
   ) {}
 
   onModuleInit() {
@@ -40,8 +42,16 @@ export class HealthCheckService implements OnModuleInit {
     this.logger.log('Checking Menu microservice health...');
     try {
       const [appHealth, dbHealth] = await Promise.all([
-        firstValueFrom(this.menuHealthCheckService.checkAppHealth({})),
-        firstValueFrom(this.menuHealthCheckService.checkDatabaseConnection({})),
+        firstValueFrom(
+          this.menuHealthCheckService
+            .checkAppHealth({})
+            .pipe(this.metricsService.trackGrpcCall('menu-microservice', 'checkAppHealth')),
+        ),
+        firstValueFrom(
+          this.menuHealthCheckService
+            .checkDatabaseConnection({})
+            .pipe(this.metricsService.trackGrpcCall('menu-microservice', 'checkDatabaseConnection')),
+        ),
       ]);
       return { appHealth, dbHealth };
     } catch (error) {
@@ -57,8 +67,16 @@ export class HealthCheckService implements OnModuleInit {
     this.logger.log('Checking User microservice health...');
     try {
       const [appHealth, dbHealth] = await Promise.all([
-        firstValueFrom(this.userHealthCheckService.checkAppHealth({})),
-        firstValueFrom(this.userHealthCheckService.checkDatabaseConnection({})),
+        firstValueFrom(
+          this.userHealthCheckService
+            .checkAppHealth({})
+            .pipe(this.metricsService.trackGrpcCall('user-microservice', 'checkAppHealth')),
+        ),
+        firstValueFrom(
+          this.userHealthCheckService
+            .checkDatabaseConnection({})
+            .pipe(this.metricsService.trackGrpcCall('user-microservice', 'checkDatabaseConnection')),
+        ),
       ]);
       return { appHealth, dbHealth };
     } catch (error) {
@@ -87,7 +105,11 @@ export class HealthCheckService implements OnModuleInit {
   async checkMediaMicroserviceHealth(): Promise<{ appHealth: ServiceResponse }> {
     this.logger.log('Checking Media microservice health...');
     try {
-      const appHealth = await firstValueFrom(this.mediaHealthCheckService.checkAppHealth({}));
+      const appHealth = await firstValueFrom(
+        this.mediaHealthCheckService
+          .checkAppHealth({})
+          .pipe(this.metricsService.trackGrpcCall('media-microservice', 'checkAppHealth')),
+      );
       return { appHealth };
     } catch (error) {
       this.logger.error(`Media microservice health check failed: ${(error as Error).message || 'Unknown error'}`);

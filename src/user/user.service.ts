@@ -17,6 +17,9 @@ import {
   type UserRoleRequest,
   type UserServiceClient,
 } from 'src/generated-types/user';
+import { MetricsService } from 'src/supervision/metrics/metrics.service';
+
+const TARGET_SERVICE = 'user-microservice';
 
 @Injectable()
 export class UserService implements OnModuleInit {
@@ -26,6 +29,7 @@ export class UserService implements OnModuleInit {
   constructor(
     @Inject('USER_CLIENT')
     private readonly userMicroserviceClient: ClientGrpc,
+    private readonly metricsService: MetricsService,
   ) {}
 
   onModuleInit() {
@@ -34,26 +38,16 @@ export class UserService implements OnModuleInit {
 
   getUserById(id: string, currentUserId: string): Observable<User> {
     this.logger.log(`Fetching user by ID: ${id}`);
-    try {
-      if (id !== currentUserId) {
-        this.logger.warn(`User ID mismatch: requested ID ${id} does not match current user ID ${currentUserId}`);
-        throw new BadRequestException('You can only fetch your own user profile.');
-      }
-      return this.userService.getUserById({ id });
-    } catch (error) {
-      this.logger.error(`Failed to fetch user by ID: ${(error as Error).message || 'Unknown error'}`);
-      throw error;
+    if (id !== currentUserId) {
+      this.logger.warn(`User ID mismatch: requested ID ${id} does not match current user ID ${currentUserId}`);
+      throw new BadRequestException('You can only fetch your own user profile.');
     }
+    return this.userService.getUserById({ id }).pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'getUserById'));
   }
 
   getAllUsers(data: PaginationMeta): Observable<AllUsersResponse> {
     this.logger.log(`Fetching all users with page: ${data.page}, limit: ${data.limit}`);
-    try {
-      return this.userService.getAllUsers(data);
-    } catch (error) {
-      this.logger.error(`Failed to fetch all users: ${(error as Error).message || 'Unknown error'}`);
-      throw error;
-    }
+    return this.userService.getAllUsers(data).pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'getAllUsers'));
   }
 
   updateUser(data: UpdateUserRequest): Observable<User> {
@@ -62,97 +56,56 @@ export class UserService implements OnModuleInit {
       this.logger.warn(`No update fields provided for user ID: ${data.id}`);
       throw new BadRequestException('At least one field (name, phoneNumber) must be provided for update.');
     }
-    try {
-      return this.userService.updateUser(data);
-    } catch (error) {
-      this.logger.error(`Failed to update user with ID ${data.id}: ${(error as Error).message || 'Unknown error'}`);
-      throw error;
-    }
+    return this.userService.updateUser(data).pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'updateUser'));
   }
 
   deleteUser(id: string): Observable<StatusResponse> {
     this.logger.log(`Deleting user with ID: ${id}`);
-    try {
-      return this.userService.deleteUser({ id });
-    } catch (error) {
-      this.logger.error(`Failed to delete user with ID ${id}: ${(error as Error).message || 'Unknown error'}`);
-      throw error;
-    }
+    return this.userService.deleteUser({ id }).pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'deleteUser'));
   }
 
   confirmPassword(data: PasswordRequest): Observable<StatusResponse> {
     this.logger.log(`Confirming password for user ID: ${data.id}`);
-    try {
-      return this.userService.confirmPassword(data);
-    } catch (error) {
-      this.logger.error(
-        `Failed to confirm password for user ID ${data.id}: ${(error as Error).message || 'Unknown error'}`,
-      );
-      throw error;
-    }
+    return this.userService
+      .confirmPassword(data)
+      .pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'confirmPassword'));
   }
 
   changePassword(data: PasswordRequest): Observable<StatusResponse> {
     this.logger.log(`Changing password for user ID: ${data.id}`);
-    try {
-      return this.userService.changePassword(data);
-    } catch (error) {
-      this.logger.error(
-        `Failed to change password for user ID ${data.id}: ${(error as Error).message || 'Unknown error'}`,
-      );
-      throw error;
-    }
+    return this.userService
+      .changePassword(data)
+      .pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'changePassword'));
   }
 
   banUser(data: BanUserRequest): Observable<User> {
     this.logger.log(`Banning user with ID: ${data.id}`);
-    try {
-      return this.userService.banUser(data);
-    } catch (error) {
-      this.logger.error(`Failed to ban user with ID ${data.id}: ${(error as Error).message || 'Unknown error'}`);
-      throw error;
-    }
+    return this.userService.banUser(data).pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'banUser'));
   }
 
   unbanUser(data: BanUserRequest): Observable<User> {
     this.logger.log(`Unbanning user with ID: ${data.id}`);
-    try {
-      return this.userService.unbanUser(data);
-    } catch (error) {
-      this.logger.error(`Failed to unban user with ID ${data.id}: ${(error as Error).message || 'Unknown error'}`);
-      throw error;
-    }
+    return this.userService.unbanUser(data).pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'unbanUser'));
   }
 
   getBannedUsers(): Observable<GetBannedUsersResponse> {
     this.logger.log(`Fetching all banned users`);
-    try {
-      return this.userService.getBannedUsers({});
-    } catch (error) {
-      this.logger.error(`Failed to fetch banned users: ${(error as Error).message || 'Unknown error'}`);
-      throw error;
-    }
+    return this.userService
+      .getBannedUsers({})
+      .pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'getBannedUsers'));
   }
 
   getBanDetailsByUserId(id: string): Observable<BanDetailsResponse> {
     this.logger.log(`Fetching ban details for user ID: ${id}`);
-    try {
-      return this.userService.getBanDetailsByUserId({ id });
-    } catch (error) {
-      this.logger.error(
-        `Failed to fetch ban details for user ID ${id}: ${(error as Error).message || 'Unknown error'}`,
-      );
-      throw error;
-    }
+    return this.userService
+      .getBanDetailsByUserId({ id })
+      .pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'getBanDetailsByUserId'));
   }
 
   changeUserRole(data: UserRoleRequest): Observable<User> {
     this.logger.log(`Changing role for user ID: ${data.id} to ${UserRole[data.role]}`);
-    try {
-      return this.userService.changeUserRole(data);
-    } catch (error) {
-      this.logger.error(`Failed to change role for user ID ${data.id}: ${(error as Error).message || 'Unknown error'}`);
-      throw error;
-    }
+    return this.userService
+      .changeUserRole(data)
+      .pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'changeUserRole'));
   }
 }

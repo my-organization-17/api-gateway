@@ -11,6 +11,9 @@ import {
   type SignUpRequest,
 } from 'src/generated-types/auth';
 import type { StatusResponse, User } from 'src/generated-types/user';
+import { MetricsService } from 'src/supervision/metrics/metrics.service';
+
+const TARGET_SERVICE = 'user-microservice';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
@@ -20,6 +23,7 @@ export class AuthService implements OnModuleInit {
   constructor(
     @Inject('AUTH_CLIENT')
     private readonly authMicroserviceClient: ClientGrpc,
+    private readonly metricsService: MetricsService,
   ) {}
 
   onModuleInit() {
@@ -28,81 +32,72 @@ export class AuthService implements OnModuleInit {
 
   signUp(data: SignUpRequest): Observable<User> {
     this.logger.log(`Signing up user with email: ${data.email}`);
-    try {
-      return this.authService.signUp(data);
-    } catch (error) {
-      this.logger.error(`Failed to sign up user: ${(error as Error).message || 'Unknown error'}`);
-      throw error;
-    }
+    return this.authService
+      .signUp(data)
+      .pipe(
+        this.metricsService.trackGrpcCall(TARGET_SERVICE, 'signUp'),
+        this.metricsService.trackAuthAttempt('signup'),
+      );
   }
 
   resendConfirmationEmail(email: string): Observable<StatusResponse> {
     this.logger.log(`Resending confirmation email to: ${email}`);
-    try {
-      return this.authService.resendConfirmationEmail({ email });
-    } catch (error) {
-      this.logger.error(`Failed to resend confirmation email: ${(error as Error).message || 'Unknown error'}`);
-      throw error;
-    }
+    return this.authService
+      .resendConfirmationEmail({ email })
+      .pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'resendConfirmationEmail'));
   }
 
   verifyEmail(token: string): Observable<AuthResponse> {
     this.logger.log(`Verifying email with token: ${token}`);
-    try {
-      return this.authService.verifyEmail({ token });
-    } catch (error) {
-      this.logger.error(`Failed to verify email: ${(error as Error).message || 'Unknown error'}`);
-      throw error;
-    }
+    return this.authService
+      .verifyEmail({ token })
+      .pipe(
+        this.metricsService.trackGrpcCall(TARGET_SERVICE, 'verifyEmail'),
+        this.metricsService.trackAuthAttempt('verify_email'),
+      );
   }
 
   signIn(data: SignInRequest): Observable<AuthResponse> {
     this.logger.log(`Signing in user with email: ${data.email}`);
-    try {
-      return this.authService.signIn(data);
-    } catch (error) {
-      this.logger.error(`Failed to sign in user: ${(error as Error).message || 'Unknown error'}`);
-      throw error;
-    }
+    return this.authService
+      .signIn(data)
+      .pipe(
+        this.metricsService.trackGrpcCall(TARGET_SERVICE, 'signIn'),
+        this.metricsService.trackAuthAttempt('signin'),
+      );
   }
 
   refreshTokens(refreshToken: string): Observable<RefreshTokensResponse> {
     this.logger.log(`Refreshing tokens with refresh token: ${refreshToken}`);
-    try {
-      return this.authService.refreshTokens({ token: refreshToken });
-    } catch (error) {
-      this.logger.error(`Failed to refresh tokens: ${(error as Error).message || 'Unknown error'}`);
-      throw error;
-    }
+    return this.authService
+      .refreshTokens({ token: refreshToken })
+      .pipe(
+        this.metricsService.trackGrpcCall(TARGET_SERVICE, 'refreshTokens'),
+        this.metricsService.trackAuthAttempt('refresh_tokens'),
+      );
   }
 
   initResetPassword(email: string): Observable<StatusResponse> {
     this.logger.log(`Initiating reset password for email: ${email}`);
-    try {
-      return this.authService.initResetPassword({ email });
-    } catch (error) {
-      this.logger.error(`Failed to initiate reset password: ${(error as Error).message || 'Unknown error'}`);
-      throw error;
-    }
+    return this.authService
+      .initResetPassword({ email })
+      .pipe(
+        this.metricsService.trackGrpcCall(TARGET_SERVICE, 'initResetPassword'),
+        this.metricsService.trackAuthAttempt('reset_password'),
+      );
   }
 
   resendResetPasswordEmail(email: string): Observable<StatusResponse> {
     this.logger.log(`Resending reset password email to: ${email}`);
-    try {
-      return this.authService.resendResetPasswordEmail({ email });
-    } catch (error) {
-      this.logger.error(`Failed to resend reset password email: ${(error as Error).message || 'Unknown error'}`);
-      throw error;
-    }
+    return this.authService
+      .resendResetPasswordEmail({ email })
+      .pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'resendResetPasswordEmail'));
   }
 
   setNewPassword(token: string, password: string): Observable<StatusResponse> {
     this.logger.log(`Setting new password with token: ${token}`);
-    try {
-      return this.authService.setNewPassword({ token, password });
-    } catch (error) {
-      this.logger.error(`Failed to set new password: ${(error as Error).message || 'Unknown error'}`);
-      throw error;
-    }
+    return this.authService
+      .setNewPassword({ token, password })
+      .pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'setNewPassword'));
   }
 }

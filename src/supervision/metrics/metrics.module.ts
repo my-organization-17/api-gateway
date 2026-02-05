@@ -1,13 +1,19 @@
 import { Global, Module } from '@nestjs/common';
-import { APP_INTERCEPTOR } from '@nestjs/core';
-import {
-  makeCounterProvider,
-  makeGaugeProvider,
-  makeHistogramProvider,
-  PrometheusModule,
-} from '@willsoto/nestjs-prometheus';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 
+import { GrpcExceptionFilter } from 'src/utils/grpc-exception-filter';
 import { HttpMetricsInterceptor } from './http-metrics.interceptor';
+import { MetricsService } from './metrics.service';
+import {
+  AUTH_ATTEMPTS_TOTAL_PROVIDER,
+  ERRORS_TOTAL_PROVIDER,
+  GRPC_CLIENT_DURATION_PROVIDER,
+  GRPC_CLIENT_REQUESTS_TOTAL_PROVIDER,
+  HTTP_ACTIVE_REQUESTS_PROVIDER,
+  HTTP_REQUEST_DURATION_PROVIDER,
+  HTTP_REQUESTS_TOTAL_PROVIDER,
+} from './metrics.providers';
 
 @Global()
 @Module({
@@ -20,27 +26,26 @@ import { HttpMetricsInterceptor } from './http-metrics.interceptor';
     }),
   ],
   providers: [
-    makeHistogramProvider({
-      name: 'http_request_duration_seconds',
-      help: 'Duration of HTTP requests in seconds',
-      labelNames: ['service', 'method', 'route', 'status_code'],
-      buckets: [0.1, 0.5, 1, 2.5, 5, 10],
-    }),
-    makeGaugeProvider({
-      name: 'http_active_requests',
-      help: 'Number of active HTTP requests',
-      labelNames: ['service', 'method', 'route'],
-    }),
-    makeCounterProvider({
-      name: 'http_requests_total',
-      help: 'Total number of HTTP requests',
-      labelNames: ['service', 'method', 'route', 'status_code'],
-    }),
+    // Providers
+    HTTP_REQUEST_DURATION_PROVIDER,
+    HTTP_ACTIVE_REQUESTS_PROVIDER,
+    HTTP_REQUESTS_TOTAL_PROVIDER,
+    GRPC_CLIENT_DURATION_PROVIDER,
+    GRPC_CLIENT_REQUESTS_TOTAL_PROVIDER,
+    ERRORS_TOTAL_PROVIDER,
+    AUTH_ATTEMPTS_TOTAL_PROVIDER,
+
+    // Services and interceptors
+    MetricsService,
     {
       provide: APP_INTERCEPTOR,
       useClass: HttpMetricsInterceptor,
     },
+    {
+      provide: APP_FILTER,
+      useClass: GrpcExceptionFilter,
+    },
   ],
-  exports: [],
+  exports: [MetricsService],
 })
 export class MetricsModule {}
