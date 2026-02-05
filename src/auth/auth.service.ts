@@ -68,7 +68,7 @@ export class AuthService implements OnModuleInit {
   }
 
   refreshTokens(refreshToken: string): Observable<RefreshTokensResponse> {
-    this.logger.log(`Refreshing tokens with refresh token: ${refreshToken}`);
+    this.logger.log(`Refreshing tokens with refresh token: ${refreshToken.slice(0, 10)}...`);
     return this.authService
       .refreshTokens({ token: refreshToken })
       .pipe(
@@ -95,9 +95,23 @@ export class AuthService implements OnModuleInit {
   }
 
   setNewPassword(token: string, password: string): Observable<StatusResponse> {
-    this.logger.log(`Setting new password with token: ${token}`);
+    this.logger.log(`Setting new password with token: ${token.slice(0, 10)}...`);
     return this.authService
       .setNewPassword({ token, password })
       .pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'setNewPassword'));
+  }
+
+  signOutOtherDevices(userId: string, currentSessionId: string): Observable<StatusResponse> {
+    this.logger.log(`Signing out other devices for user ID: ${userId}, excluding session ID: ${currentSessionId}`);
+    return this.authService
+      .signOutOtherDevices({ userId, currentSessionId })
+      .pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'signOutOtherDevices'));
+  }
+
+  signOutAllDevices(id: string): Observable<StatusResponse> {
+    this.logger.log(`Signing out all devices for user ID: ${id}`);
+    return this.authService
+      .signOutAllDevices({ id })
+      .pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'signOutAllDevices'));
   }
 }

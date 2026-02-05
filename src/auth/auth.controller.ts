@@ -19,6 +19,7 @@ import { SerializeInterceptor } from 'src/utils/serialize.interceptor';
 import { PasswordRequestDto, UserResponseDto } from 'src/common/dto';
 import { AuthResponseDto, EmailRequestDto, SignInRequestDto, SignUpRequestDto, TokenResponseDto } from './dto';
 import { AuthService } from './auth.service';
+import { Protected, SessionId, UserId } from './decorators';
 
 import type { StatusResponse } from 'src/generated-types/user';
 
@@ -117,10 +118,17 @@ export class AuthController {
   })
   public signIn(
     @Body() data: SignInRequestDto,
+    @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ): Observable<AuthResponseDto> {
     this.logger.log('Received sign-in request');
-    return this.authService.signIn(data).pipe(
+
+    // Extract client info
+    const clientInfo = {
+      ipAddress: this.getClientIp(req),
+      userAgent: req.headers['user-agent'] || 'Unknown',
+    };
+    return this.authService.signIn({ ...data, clientInfo }).pipe(
       tap((response) => {
         res.cookie('refresh_token', response.refreshToken, {
           httpOnly: true,
@@ -170,26 +178,6 @@ export class AuthController {
     );
   }
 
-  // User Logout
-  @Post('logout')
-  @ApiOperation({
-    summary: 'User Logout',
-    description: 'Logs out the user by clearing the refresh token cookie',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'The user has been successfully logged out',
-  })
-  public logout(@Res({ passthrough: true }) res: Response): void {
-    this.logger.log('Received logout request');
-    res.clearCookie('refresh_token', {
-      httpOnly: true,
-      secure: this.configService.get<string>('NODE_ENV') === 'production',
-      domain: this.configService.get<string>('COOKIE_DOMAIN'),
-      sameSite: 'lax',
-    });
-  }
-
   // Initiate Reset Password
   @Post('init-reset-password')
   @ApiOperation({
@@ -210,7 +198,7 @@ export class AuthController {
   @Post('resend-reset-password-email')
   @ApiOperation({
     summary: 'Resend Reset Password Email',
-    description: 'Resends the password reset email to the specified email address',
+    description: 'Resend the password reset email to the specified email address',
   })
   @ApiBody({ type: EmailRequestDto })
   @ApiResponse({
@@ -244,5 +232,73 @@ export class AuthController {
   ): Observable<StatusResponse> {
     this.logger.log('Received request to set new password');
     return this.authService.setNewPassword(token, password);
+  }
+
+  // User Logout
+  @Post('logout')
+  @ApiOperation({
+    summary: 'User Logout',
+    description: 'Logs out the user by clearing the refresh token cookie',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The user has been successfully logged out',
+  })
+  public logout(@Res({ passthrough: true }) res: Response): void {
+    this.logger.log('Received logout request');
+    res.clearCookie('refresh_token', {
+      httpOnly: true,
+      secure: this.configService.get<string>('NODE_ENV') === 'production',
+      domain: this.configService.get<string>('COOKIE_DOMAIN'),
+      sameSite: 'lax',
+    });
+  }
+
+  // Sign Out Other Devices
+  @Post('signout-other-devices')
+  @Protected()
+  @ApiOperation({
+    summary: 'Sign Out Other Devices',
+    description:
+      'Signs out the user from all other devices except the current one by invalidating other refresh tokens',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The user has been successfully signed out from other devices',
+  })
+  public signOutOtherDevices(@UserId() userId: string, @SessionId() sessionId: string): Observable<StatusResponse> {
+    this.logger.log(`Received request to sign out other devices for user ID: ${userId}`);
+    if (!sessionId) {
+      this.logger.warn('No current session ID found in request');
+      throw new UnauthorizedException('Unauthorized: No current session ID found');
+    }
+    return this.authService.signOutOtherDevices(userId, sessionId);
+  }
+
+  // Sign Out All Devices
+  @Post('signout-all-devices')
+  @Protected()
+  @ApiOperation({
+    summary: 'Sign Out All Devices',
+    description: 'Signs out the user from all devices by invalidating all refresh tokens',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The user has been successfully signed out from all devices',
+  })
+  public signOutAllDevices(@UserId() id: string): Observable<StatusResponse> {
+    this.logger.log(`Received request to sign out all devices for user ID: ${id}`);
+    return this.authService.signOutAllDevices(id);
+  }
+
+  // Helper method to get client IP address
+  private getClientIp(req: Request): string {
+    // Handle proxies (X-Forwarded-For header)
+    const forwarded = req.headers['x-forwarded-for'];
+    if (forwarded) {
+      const ips = Array.isArray(forwarded) ? forwarded[0] : forwarded.split(',')[0];
+      return ips.trim();
+    }
+    return req.ip || req.socket.remoteAddress || 'Unknown';
   }
 }

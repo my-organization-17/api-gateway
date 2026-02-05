@@ -5,7 +5,7 @@ interface RequestWithUser extends Request {
   user?: JwtResponseDto;
 }
 
-export const UserId = createParamDecorator((data: unknown, ctx: ExecutionContext): string | undefined => {
+export const SessionId = createParamDecorator((data: unknown, ctx: ExecutionContext): string | undefined => {
   const request = ctx.switchToHttp().getRequest<RequestWithUser>();
-  return request.user?.id;
+  return request.user?.sid;
 });
