@@ -92,10 +92,10 @@ export class AuthController {
       tap((response) => {
         res.cookie('refresh_token', response.refreshToken, {
           httpOnly: true,
-          secure: this.configService.get<string>('NODE_ENV') === 'production',
-          domain: this.configService.get<string>('COOKIE_DOMAIN'),
+          secure: this.configService.getOrThrow<string>('NODE_ENV') === 'production',
+          domain: this.configService.getOrThrow<string>('COOKIE_DOMAIN'),
           sameSite: 'lax',
-          maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+          maxAge: this.configService.getOrThrow<number>('COOKIE_TTL') * 1000, // 7 days
         });
       }),
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -135,7 +135,7 @@ export class AuthController {
           secure: this.configService.get<string>('NODE_ENV') === 'production',
           domain: this.configService.get<string>('COOKIE_DOMAIN'),
           sameSite: 'lax',
-          maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+          maxAge: this.configService.getOrThrow<number>('COOKIE_TTL') * 1000, // 7 days
         });
       }),
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -170,7 +170,7 @@ export class AuthController {
           secure: this.configService.get<string>('NODE_ENV') === 'production',
           domain: this.configService.get<string>('COOKIE_DOMAIN'),
           sameSite: 'lax',
-          maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+          maxAge: this.configService.getOrThrow<number>('COOKIE_TTL') * 1000, // 7 days
         });
       }),
       // eslint-disable-next-line @typescript-eslint/no-unused-vars

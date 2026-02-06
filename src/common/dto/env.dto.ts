@@ -1,4 +1,4 @@
-import { IsInt, IsNotEmpty, IsString, IsUrl, Max } from 'class-validator';
+import { IsInt, IsNotEmpty, IsString, IsUrl, Max, Min } from 'class-validator';
 
 export class EnvironmentVariables {
   @IsString()
@@ -6,7 +6,7 @@ export class EnvironmentVariables {
   readonly NODE_ENV: string;
 
   @IsInt()
-  @IsNotEmpty()
+  @Min(0)
   @Max(65535)
   readonly HTTP_PORT: number;
 
@@ -29,6 +29,11 @@ export class EnvironmentVariables {
   @IsUrl({ require_tld: false }, { message: 'COOKIE_DOMAIN must be a valid URL' })
   @IsNotEmpty()
   readonly COOKIE_DOMAIN: string;
+
+  @IsInt()
+  @IsNotEmpty()
+  @Min(0)
+  readonly COOKIE_TTL: number;
 
   @IsString()
   @IsNotEmpty()
