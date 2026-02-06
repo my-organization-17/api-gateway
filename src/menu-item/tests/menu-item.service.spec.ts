@@ -9,6 +9,7 @@ import type {
   CreateMenuItemRequest,
   UpdateMenuItemRequest,
 } from 'src/generated-types/menu-item';
+import { MetricsService } from 'src/supervision/metrics/metrics.service';
 
 describe('MenuItemService', () => {
   let service: MenuItemService;
@@ -42,6 +43,15 @@ describe('MenuItemService', () => {
   const deleteMenuItemMock = jest.fn();
   const changeMenuItemPositionMock = jest.fn();
 
+  const passthrough =
+    <T>() =>
+    (source: import('rxjs').Observable<T>) =>
+      source;
+
+  const mockMetricsService = {
+    trackGrpcCall: jest.fn().mockReturnValue(passthrough()),
+  };
+
   beforeEach(async () => {
     getMenuItemsByCategoryIdMock.mockReturnValue(of(mockMenuItemList));
     getMenuItemByIdMock.mockReturnValue(of(mockMenuItem));
@@ -69,6 +79,10 @@ describe('MenuItemService', () => {
         {
           provide: 'MENU_ITEM_CLIENT',
           useValue: mockGrpcClient,
+        },
+        {
+          provide: MetricsService,
+          useValue: mockMetricsService,
         },
       ],
     }).compile();

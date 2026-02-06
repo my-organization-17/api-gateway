@@ -3,6 +3,7 @@ import { BadRequestException, ServiceUnavailableException } from '@nestjs/common
 import { of, throwError } from 'rxjs';
 
 import { MediaService } from '../media.service';
+import { MetricsService } from 'src/supervision/metrics/metrics.service';
 
 describe('MediaService', () => {
   let service: MediaService;
@@ -26,6 +27,15 @@ describe('MediaService', () => {
   const deleteAvatarMock = jest.fn();
   const getUserByIdMock = jest.fn();
   const updateUserMock = jest.fn();
+
+  const passthrough =
+    <T>() =>
+    (source: import('rxjs').Observable<T>) =>
+      source;
+
+  const mockMetricsService = {
+    trackGrpcCall: jest.fn().mockReturnValue(passthrough()),
+  };
 
   beforeEach(async () => {
     getImageUrlMock.mockReturnValue(of(mockFileUrl));
@@ -63,6 +73,10 @@ describe('MediaService', () => {
         {
           provide: 'USER_CLIENT',
           useValue: mockUserClient,
+        },
+        {
+          provide: MetricsService,
+          useValue: mockMetricsService,
         },
       ],
     }).compile();

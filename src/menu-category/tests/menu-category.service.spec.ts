@@ -4,6 +4,7 @@ import { firstValueFrom, of } from 'rxjs';
 import { MenuCategoryService } from '../menu-category.service';
 import { Language } from 'src/common/enums';
 import type { MenuCategory, MenuCategoryList, StatusResponse } from 'src/generated-types/menu-category';
+import { MetricsService } from 'src/supervision/metrics/metrics.service';
 
 describe('MenuCategoryService', () => {
   let service: MenuCategoryService;
@@ -37,6 +38,15 @@ describe('MenuCategoryService', () => {
   const changeMenuCategoryPositionMock = jest.fn();
   const deleteMenuCategoryMock = jest.fn();
 
+  const passthrough =
+    <T>() =>
+    (source: import('rxjs').Observable<T>) =>
+      source;
+
+  const mockMetricsService = {
+    trackGrpcCall: jest.fn().mockReturnValue(passthrough()),
+  };
+
   beforeEach(async () => {
     getFullMenuByLanguageMock.mockReturnValue(of({ data: [{ ...mockMenuCategory, menuItems: [] }] }));
     getMenuCategoriesByLanguageMock.mockReturnValue(of(mockMenuCategoryList));
@@ -66,6 +76,10 @@ describe('MenuCategoryService', () => {
         {
           provide: 'MENU_CATEGORY_CLIENT',
           useValue: mockGrpcClient,
+        },
+        {
+          provide: MetricsService,
+          useValue: mockMetricsService,
         },
       ],
     }).compile();

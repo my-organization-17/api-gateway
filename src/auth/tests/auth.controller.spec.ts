@@ -50,6 +50,8 @@ describe('AuthController', () => {
   const initResetPasswordMock = jest.fn();
   const resendResetPasswordEmailMock = jest.fn();
   const setNewPasswordMock = jest.fn();
+  const signOutOtherDevicesMock = jest.fn();
+  const signOutAllDevicesMock = jest.fn();
   const configGetMock = jest.fn();
   const cookieMock = jest.fn();
   const clearCookieMock = jest.fn();
@@ -68,6 +70,8 @@ describe('AuthController', () => {
     initResetPasswordMock.mockReturnValue(of(mockStatusResponse));
     resendResetPasswordEmailMock.mockReturnValue(of(mockStatusResponse));
     setNewPasswordMock.mockReturnValue(of(mockStatusResponse));
+    signOutOtherDevicesMock.mockReturnValue(of(mockStatusResponse));
+    signOutAllDevicesMock.mockReturnValue(of(mockStatusResponse));
     configGetMock.mockImplementation((key: string) => {
       if (key === 'NODE_ENV') return 'test';
       if (key === 'COOKIE_DOMAIN') return 'localhost';
@@ -88,6 +92,8 @@ describe('AuthController', () => {
             initResetPassword: initResetPasswordMock,
             resendResetPasswordEmail: resendResetPasswordEmailMock,
             setNewPassword: setNewPasswordMock,
+            signOutOtherDevices: signOutOtherDevicesMock,
+            signOutAllDevices: signOutAllDevicesMock,
           },
         },
         {
@@ -159,19 +165,31 @@ describe('AuthController', () => {
   });
 
   describe('signIn', () => {
-    it('should sign in, set cookie, and return response without refreshToken', async () => {
+    it('should sign in with client info, set cookie, and return response without refreshToken', async () => {
       const signInData = {
         email: 'test@example.com',
         password: 'password123',
       };
 
-      const result = await firstValueFrom(controller.signIn(signInData, mockResponse));
+      const mockRequest = {
+        headers: { 'user-agent': 'test-agent' },
+        ip: '127.0.0.1',
+        socket: { remoteAddress: '127.0.0.1' },
+      } as unknown as Request;
+
+      const result = await firstValueFrom(controller.signIn(signInData, mockRequest, mockResponse));
 
       expect(result).toEqual({
         accessToken: mockAuthResponse.accessToken,
         user: mockAuthResponse.user,
       });
-      expect(signInMock).toHaveBeenCalledWith(signInData);
+      expect(signInMock).toHaveBeenCalledWith({
+        ...signInData,
+        clientInfo: {
+          ipAddress: '127.0.0.1',
+          userAgent: 'test-agent',
+        },
+      });
       expect(cookieMock).toHaveBeenCalledWith(
         'refresh_token',
         mockAuthResponse.refreshToken,
@@ -180,6 +198,55 @@ describe('AuthController', () => {
           sameSite: 'lax',
         }),
       );
+    });
+
+    it('should use x-forwarded-for header for IP when available', async () => {
+      const signInData = {
+        email: 'test@example.com',
+        password: 'password123',
+      };
+
+      const mockRequest = {
+        headers: {
+          'user-agent': 'test-agent',
+          'x-forwarded-for': '192.168.1.1, 10.0.0.1',
+        },
+        ip: '127.0.0.1',
+        socket: { remoteAddress: '127.0.0.1' },
+      } as unknown as Request;
+
+      await firstValueFrom(controller.signIn(signInData, mockRequest, mockResponse));
+
+      expect(signInMock).toHaveBeenCalledWith({
+        ...signInData,
+        clientInfo: {
+          ipAddress: '192.168.1.1',
+          userAgent: 'test-agent',
+        },
+      });
+    });
+
+    it('should default user-agent to Unknown when not provided', async () => {
+      const signInData = {
+        email: 'test@example.com',
+        password: 'password123',
+      };
+
+      const mockRequest = {
+        headers: {},
+        ip: '127.0.0.1',
+        socket: { remoteAddress: '127.0.0.1' },
+      } as unknown as Request;
+
+      await firstValueFrom(controller.signIn(signInData, mockRequest, mockResponse));
+
+      expect(signInMock).toHaveBeenCalledWith({
+        ...signInData,
+        clientInfo: {
+          ipAddress: '127.0.0.1',
+          userAgent: 'Unknown',
+        },
+      });
     });
   });
 
@@ -259,6 +326,35 @@ describe('AuthController', () => {
 
       expect(result).toEqual(mockStatusResponse);
       expect(setNewPasswordMock).toHaveBeenCalledWith(token, password);
+    });
+  });
+
+  describe('signOutOtherDevices', () => {
+    it('should call authService.signOutOtherDevices with userId and sessionId', async () => {
+      const userId = 'test-user-id';
+      const sessionId = 'current-session-id';
+
+      const result = await firstValueFrom(controller.signOutOtherDevices(userId, sessionId));
+
+      expect(result).toEqual(mockStatusResponse);
+      expect(signOutOtherDevicesMock).toHaveBeenCalledWith(userId, sessionId);
+    });
+
+    it('should throw UnauthorizedException when sessionId is missing', () => {
+      const userId = 'test-user-id';
+
+      expect(() => controller.signOutOtherDevices(userId, '')).toThrow(UnauthorizedException);
+    });
+  });
+
+  describe('signOutAllDevices', () => {
+    it('should call authService.signOutAllDevices with userId', async () => {
+      const userId = 'test-user-id';
+
+      const result = await firstValueFrom(controller.signOutAllDevices(userId));
+
+      expect(result).toEqual(mockStatusResponse);
+      expect(signOutAllDevicesMock).toHaveBeenCalledWith(userId);
     });
   });
 });

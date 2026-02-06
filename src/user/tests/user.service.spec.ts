@@ -11,6 +11,7 @@ import {
   type GetBannedUsersResponse,
   type BanDetailsResponse,
 } from 'src/generated-types/user';
+import { MetricsService } from 'src/supervision/metrics/metrics.service';
 
 describe('UserService', () => {
   let service: UserService;
@@ -65,6 +66,15 @@ describe('UserService', () => {
   const getBanDetailsByUserIdMock = jest.fn();
   const changeUserRoleMock = jest.fn();
 
+  const passthrough =
+    <T>() =>
+    (source: import('rxjs').Observable<T>) =>
+      source;
+
+  const mockMetricsService = {
+    trackGrpcCall: jest.fn().mockReturnValue(passthrough()),
+  };
+
   beforeEach(async () => {
     getUserByIdMock.mockReturnValue(of(mockUser));
     getAllUsersMock.mockReturnValue(of(mockAllUsersResponse));
@@ -102,6 +112,10 @@ describe('UserService', () => {
         {
           provide: 'USER_CLIENT',
           useValue: mockGrpcClient,
+        },
+        {
+          provide: MetricsService,
+          useValue: mockMetricsService,
         },
       ],
     }).compile();

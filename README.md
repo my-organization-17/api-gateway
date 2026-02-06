@@ -119,6 +119,8 @@ docker-compose up
 | POST | `/auth/init-reset-password` | No | Initiate password reset |
 | POST | `/auth/resend-reset-password-email` | No | Resend password reset email |
 | POST | `/auth/set-new-password?token=` | No | Set new password |
+| POST | `/auth/signout-other-devices` | JWT | Sign out all other sessions |
+| POST | `/auth/signout-all-devices` | JWT | Sign out all sessions |
 
 ### User (`/user`)
 
@@ -160,11 +162,16 @@ docker-compose up
 |--------|----------|------|-------------|
 | GET | `/menu-item?categoryId=` | ADMIN/MOD | Get items by category |
 | GET | `/menu-item/:id` | ADMIN/MOD | Get item details |
+| POST | `/menu-item/create` | ADMIN/MOD | Create menu item |
+| PATCH | `/menu-item/update` | ADMIN/MOD | Update menu item |
+| PATCH | `/menu-item/change-position/:id` | ADMIN/MOD | Reorder menu item |
+| DELETE | `/menu-item/:id` | ADMIN/MOD | Delete menu item |
 
 ### Media (`/media`)
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
+| GET | `/media/avatar-url` | JWT | Get avatar URL |
 | POST | `/media/upload-avatar` | JWT | Upload avatar (max 1MB, JPEG/PNG/GIF/WebP) |
 | DELETE | `/media/remove-avatar` | JWT | Remove avatar |
 
@@ -270,6 +277,7 @@ Proto definitions are located in `/proto/`:
 - `user.proto` - User service
 - `menu-category.proto` - Menu category service
 - `menu-item.proto` - Menu item service
+- `media.proto` - Media service
 - `health-check.proto` - Health check service
 
 Generated TypeScript types are in `src/generated-types/`.
@@ -282,19 +290,19 @@ Generated TypeScript types are in `src/generated-types/`.
 └─────────────┘                    │   (Port 4004)   │
                                    └────────┬────────┘
                                             │
-                    ┌───────────────────────┼───────────────────────┐
-                    │                       │                       │
-                    ▼ gRPC                  ▼ gRPC                  ▼ RabbitMQ
-           ┌───────────────┐       ┌───────────────┐       ┌───────────────┐
-           │     User      │       │     Menu      │       │ Notification  │
-           │ Microservice  │       │ Microservice  │       │ Microservice  │
-           │  (Port 5002)  │       │  (Port 5001)  │       │   (Queue)     │
-           └───────────────┘       └───────────────┘       └───────────────┘
-                    │                       │
-                    ▼                       ▼
-           ┌───────────────┐       ┌───────────────┐
-           │   Postgresql  │       │   Postgresql  │
-           └───────────────┘       └───────────────┘
+              ┌────────────────┬────────────┼────────────┬────────────────┐
+              │                │            │            │                │
+              ▼ gRPC           ▼ gRPC       ▼ gRPC       ▼ RabbitMQ      ▼ gRPC
+     ┌───────────────┐ ┌───────────────┐ ┌──────────┐ ┌──────────────┐ ┌─────────┐
+     │     User      │ │     Menu      │ │  Media   │ │ Notification │ │ Jaeger  │
+     │ Microservice  │ │ Microservice  │ │  Micro   │ │ Microservice │ │ Tracing │
+     │  (Port 5002)  │ │  (Port 5001)  │ │ (5003)   │ │   (Queue)    │ │ (4317)  │
+     └───────┬───────┘ └───────┬───────┘ └────┬─────┘ └──────────────┘ └─────────┘
+             │                 │              │
+             ▼                 ▼              ▼
+     ┌───────────────┐ ┌───────────────┐ ┌──────────┐
+     │   Postgresql  │ │   Postgresql  │ │  S3/Minio│
+     └───────────────┘ └───────────────┘ └──────────┘
 ```
 
 ## License

@@ -3,6 +3,7 @@ import { of, throwError } from 'rxjs';
 
 import { HealthCheckService } from '../health-check.service';
 import { MessageBrokerService } from 'src/transport/message-broker/message-broker.service';
+import { MetricsService } from 'src/supervision/metrics/metrics.service';
 
 describe('HealthCheckService', () => {
   let service: HealthCheckService;
@@ -17,6 +18,15 @@ describe('HealthCheckService', () => {
   const userCheckDatabaseConnectionMock = jest.fn();
   const mediaCheckAppHealthMock = jest.fn();
   const sendMessageMock = jest.fn();
+
+  const passthrough =
+    <T>() =>
+    (source: import('rxjs').Observable<T>) =>
+      source;
+
+  const mockMetricsService = {
+    trackGrpcCall: jest.fn().mockReturnValue(passthrough()),
+  };
 
   beforeEach(async () => {
     menuCheckAppHealthMock.mockReturnValue(of(mockHealthyAppResponse));
@@ -72,6 +82,10 @@ describe('HealthCheckService', () => {
           useValue: {
             sendMessage: sendMessageMock,
           },
+        },
+        {
+          provide: MetricsService,
+          useValue: mockMetricsService,
         },
       ],
     }).compile();
