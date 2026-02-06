@@ -2,24 +2,20 @@ import { Controller, Get, Logger } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { HealthCheckService } from './health-check.service';
+import type { HealthCheckResponse } from 'src/generated-types/health-check';
 
-interface ServiceResponse {
-  serving: boolean;
-  message: string;
-}
-
-interface HealthCheckResponse {
+interface AllHealthCheckResponse {
   menuMicroservice: {
-    appHealth: ServiceResponse;
-    dbHealth: ServiceResponse;
+    appHealth: HealthCheckResponse;
+    dbHealth: HealthCheckResponse;
   };
   userMicroservice: {
-    appHealth: ServiceResponse;
-    dbHealth: ServiceResponse;
+    appHealth: HealthCheckResponse;
+    dbHealth: HealthCheckResponse;
   };
-  notificationMicroservice: ServiceResponse;
+  notificationMicroservice: HealthCheckResponse;
   mediaMicroservice: {
-    appHealth: ServiceResponse;
+    appHealth: HealthCheckResponse;
   };
 }
 
@@ -36,7 +32,6 @@ export class HealthCheckController {
   })
   @ApiResponse({
     status: 200,
-    type: Promise<HealthCheckResponse>,
     description: 'Returns the health status of all connected microservices',
     examples: {
       example1: {
@@ -71,13 +66,15 @@ export class HealthCheckController {
       },
     },
   })
-  async checkHealth(): Promise<HealthCheckResponse> {
+  async checkHealth(): Promise<AllHealthCheckResponse> {
     this.logger.log('Health check requested at API Gateway');
 
-    const menuMicroservice = await this.healthCheckService.checkMenuMicroserviceHealth();
-    const userMicroservice = await this.healthCheckService.checkUserMicroserviceHealth();
-    const notificationMicroservice = await this.healthCheckService.checkNotificationMicroserviceHealth();
-    const mediaMicroservice = await this.healthCheckService.checkMediaMicroserviceHealth();
+    const [menuMicroservice, userMicroservice, notificationMicroservice, mediaMicroservice] = await Promise.all([
+      this.healthCheckService.checkMenuMicroserviceHealth(),
+      this.healthCheckService.checkUserMicroserviceHealth(),
+      this.healthCheckService.checkNotificationMicroserviceHealth(),
+      this.healthCheckService.checkMediaMicroserviceHealth(),
+    ]);
 
     return {
       menuMicroservice,

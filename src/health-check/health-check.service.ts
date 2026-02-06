@@ -2,14 +2,14 @@ import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 
-import { HEALTH_CHECK_SERVICE_NAME, HealthCheckServiceClient } from 'src/generated-types/health-check';
 import { MetricsService } from 'src/supervision/metrics/metrics.service';
 import { MessageBrokerService } from 'src/transport/message-broker/message-broker.service';
 
-interface ServiceResponse {
-  serving: boolean;
-  message: string;
-}
+import {
+  HEALTH_CHECK_SERVICE_NAME,
+  type HealthCheckResponse,
+  type HealthCheckServiceClient,
+} from 'src/generated-types/health-check';
 
 @Injectable()
 export class HealthCheckService implements OnModuleInit {
@@ -38,7 +38,7 @@ export class HealthCheckService implements OnModuleInit {
       this.mediaMicroserviceClient.getService<HealthCheckServiceClient>(HEALTH_CHECK_SERVICE_NAME);
   }
 
-  async checkMenuMicroserviceHealth(): Promise<{ appHealth: ServiceResponse; dbHealth: ServiceResponse }> {
+  async checkMenuMicroserviceHealth(): Promise<{ appHealth: HealthCheckResponse; dbHealth: HealthCheckResponse }> {
     this.logger.log('Checking Menu microservice health...');
     try {
       const [appHealth, dbHealth] = await Promise.all([
@@ -63,7 +63,7 @@ export class HealthCheckService implements OnModuleInit {
     }
   }
 
-  async checkUserMicroserviceHealth(): Promise<{ appHealth: ServiceResponse; dbHealth: ServiceResponse }> {
+  async checkUserMicroserviceHealth(): Promise<{ appHealth: HealthCheckResponse; dbHealth: HealthCheckResponse }> {
     this.logger.log('Checking User microservice health...');
     try {
       const [appHealth, dbHealth] = await Promise.all([
@@ -88,11 +88,11 @@ export class HealthCheckService implements OnModuleInit {
     }
   }
 
-  async checkNotificationMicroserviceHealth(): Promise<ServiceResponse> {
+  async checkNotificationMicroserviceHealth(): Promise<HealthCheckResponse> {
     this.logger.log('Checking Notification microservice health...');
     try {
       return await firstValueFrom(
-        this.messageBrokerService.sendMessage<object, ServiceResponse>('health.check', {}, 3000),
+        this.messageBrokerService.sendMessage<object, HealthCheckResponse>('health.check', {}, 3000),
       );
     } catch (error) {
       this.logger.error(
@@ -102,7 +102,7 @@ export class HealthCheckService implements OnModuleInit {
     }
   }
 
-  async checkMediaMicroserviceHealth(): Promise<{ appHealth: ServiceResponse }> {
+  async checkMediaMicroserviceHealth(): Promise<{ appHealth: HealthCheckResponse }> {
     this.logger.log('Checking Media microservice health...');
     try {
       const appHealth = await firstValueFrom(
