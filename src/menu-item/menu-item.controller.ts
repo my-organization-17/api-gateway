@@ -28,8 +28,8 @@ import type { MenuItem, MenuItemList, StatusResponse } from 'src/generated-types
 @Protected(UserRole.ADMIN, UserRole.MODERATOR)
 @Controller('menu-item')
 export class MenuItemController {
+  private readonly logger = new Logger(MenuItemController.name);
   constructor(private readonly menuItemService: MenuItemService) {}
-  protected readonly logger = new Logger(MenuItemController.name);
 
   @Get()
   @ApiOperation({

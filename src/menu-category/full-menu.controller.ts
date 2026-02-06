@@ -12,8 +12,8 @@ import { Language } from 'src/common/enums/language.enum';
 @UseInterceptors(CacheInterceptor)
 @CacheTTL(60 * 1000)
 export class FullMenuController {
+  private readonly logger = new Logger(FullMenuController.name);
   constructor(private readonly menuCategoryService: MenuCategoryService) {}
-  protected readonly logger = new Logger(FullMenuController.name);
 
   @Get()
   @ApiOperation({

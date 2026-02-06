@@ -7,6 +7,7 @@ import {
   Req,
   Res,
   UnauthorizedException,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -20,17 +21,18 @@ import { PasswordRequestDto, UserResponseDto } from 'src/common/dto';
 import { AuthResponseDto, EmailRequestDto, SignInRequestDto, SignUpRequestDto, TokenResponseDto } from './dto';
 import { AuthService } from './auth.service';
 import { Protected, SessionId, UserId } from './decorators';
+import { SessionIdGuard } from './guards';
 
 import type { StatusResponse } from 'src/generated-types/user';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
+  private readonly logger = new Logger(AuthController.name);
   constructor(
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
   ) {}
-  protected readonly logger = new Logger(AuthController.name);
 
   // User Sign-Up
   @UseInterceptors(new SerializeInterceptor(UserResponseDto))
@@ -45,6 +47,7 @@ export class AuthController {
     type: UserResponseDto,
     description: 'The user has been successfully registered',
   })
+  @ApiResponse({ status: 400, description: 'Invalid input data' })
   public signUp(@Body() data: SignUpRequestDto): Observable<UserResponseDto> {
     this.logger.log('Received sign-up request');
     return this.authService.signUp(data);
@@ -61,8 +64,9 @@ export class AuthController {
     status: 200,
     description: 'The confirmation email has been successfully resent',
   })
+  @ApiResponse({ status: 404, description: 'Email not found' })
   public resendConfirmationEmail(@Body() { email }: EmailRequestDto): Observable<StatusResponse> {
-    this.logger.log(`Received request to resend confirmation email to: ${email}`);
+    this.logger.log('Received request to resend confirmation email');
     return this.authService.resendConfirmationEmail(email);
   }
 
@@ -83,23 +87,21 @@ export class AuthController {
     type: AuthResponseDto,
     description: 'The email has been successfully verified',
   })
+  @ApiResponse({ status: 400, description: 'Invalid or expired verification token' })
   public verifyEmail(
     @Query('token') token: string,
+    @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ): Observable<AuthResponseDto> {
     this.logger.log('Received email verification request');
-    return this.authService.verifyEmail(token).pipe(
-      tap((response) => {
-        res.cookie('refresh_token', response.refreshToken, {
-          httpOnly: true,
-          secure: this.configService.getOrThrow<string>('NODE_ENV') === 'production',
-          domain: this.configService.getOrThrow<string>('COOKIE_DOMAIN'),
-          sameSite: 'lax',
-          maxAge: this.configService.getOrThrow<number>('COOKIE_TTL') * 1000, // 7 days
-        });
-      }),
+    const clientInfo = {
+      ipAddress: this.getClientIp(req),
+      userAgent: req.headers['user-agent'] || 'Unknown',
+    };
+    return this.authService.verifyEmail(token, clientInfo).pipe(
+      tap((response) => this.setRefreshTokenCookie(res, response.refreshToken)),
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      map(({ refreshToken, ...rest }) => ({ ...rest })),
+      map(({ refreshToken, ...rest }) => rest),
     );
   }
 
@@ -116,6 +118,7 @@ export class AuthController {
     type: AuthResponseDto,
     description: 'The user has been successfully authenticated',
   })
+  @ApiResponse({ status: 401, description: 'Invalid credentials' })
   public signIn(
     @Body() data: SignInRequestDto,
     @Req() req: Request,
@@ -129,17 +132,9 @@ export class AuthController {
       userAgent: req.headers['user-agent'] || 'Unknown',
     };
     return this.authService.signIn({ ...data, clientInfo }).pipe(
-      tap((response) => {
-        res.cookie('refresh_token', response.refreshToken, {
-          httpOnly: true,
-          secure: this.configService.get<string>('NODE_ENV') === 'production',
-          domain: this.configService.get<string>('COOKIE_DOMAIN'),
-          sameSite: 'lax',
-          maxAge: this.configService.getOrThrow<number>('COOKIE_TTL') * 1000, // 7 days
-        });
-      }),
+      tap((response) => this.setRefreshTokenCookie(res, response.refreshToken)),
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      map(({ refreshToken, ...rest }) => ({ ...rest })),
+      map(({ refreshToken, ...rest }) => rest),
     );
   }
 
@@ -154,27 +149,19 @@ export class AuthController {
     type: TokenResponseDto,
     description: 'The tokens have been successfully refreshed',
   })
+  @ApiResponse({ status: 401, description: 'Invalid or missing refresh token' })
   public refreshTokens(@Req() req: Request, @Res({ passthrough: true }) res: Response): Observable<TokenResponseDto> {
     this.logger.log('Received token refresh request');
     const refreshToken = (req.cookies as Record<string, string>)['refresh_token'];
-    // const refreshToken = req.cookies?.refresh_token as string;
     if (!refreshToken) {
       this.logger.warn('No refresh token found in cookies');
       throw new UnauthorizedException('Unauthorized: No refresh token provided');
     }
 
     return this.authService.refreshTokens(refreshToken).pipe(
-      tap((response) => {
-        res.cookie('refresh_token', response.refreshToken, {
-          httpOnly: true,
-          secure: this.configService.get<string>('NODE_ENV') === 'production',
-          domain: this.configService.get<string>('COOKIE_DOMAIN'),
-          sameSite: 'lax',
-          maxAge: this.configService.getOrThrow<number>('COOKIE_TTL') * 1000, // 7 days
-        });
-      }),
+      tap((response) => this.setRefreshTokenCookie(res, response.refreshToken)),
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      map(({ refreshToken, ...rest }) => ({ ...rest })),
+      map(({ refreshToken, ...rest }) => rest),
     );
   }
 
@@ -189,8 +176,9 @@ export class AuthController {
     status: 200,
     description: 'The password reset email has been successfully sent',
   })
+  @ApiResponse({ status: 404, description: 'Email not found' })
   public initResetPassword(@Body() { email }: EmailRequestDto): Observable<StatusResponse> {
-    this.logger.log(`Received request to initiate password reset for email: ${email}`);
+    this.logger.log('Received request to initiate password reset');
     return this.authService.initResetPassword(email);
   }
 
@@ -205,8 +193,9 @@ export class AuthController {
     status: 200,
     description: 'The password reset email has been successfully resent',
   })
+  @ApiResponse({ status: 404, description: 'Email not found' })
   public resendResetPasswordEmail(@Body() { email }: EmailRequestDto): Observable<StatusResponse> {
-    this.logger.log(`Received request to resend password reset email to: ${email}`);
+    this.logger.log('Received request to resend password reset email');
     return this.authService.resendResetPasswordEmail(email);
   }
 
@@ -226,6 +215,7 @@ export class AuthController {
     status: 200,
     description: 'The password has been successfully updated',
   })
+  @ApiResponse({ status: 400, description: 'Invalid or expired reset token' })
   public setNewPassword(
     @Query('token') token: string,
     @Body() { password }: PasswordRequestDto,
@@ -234,28 +224,32 @@ export class AuthController {
     return this.authService.setNewPassword(token, password);
   }
 
-  // User Logout
-  @Post('logout')
+  // Sign out Current Device
+  @Post('logout-current-device')
+  @UseGuards(SessionIdGuard)
+  @Protected()
   @ApiOperation({
-    summary: 'User Logout',
-    description: 'Logs out the user by clearing the refresh token cookie',
+    summary: 'Sign Out Current Device',
+    description: 'Signs out the user from the current device by invalidating the current refresh token',
   })
   @ApiResponse({
     status: 200,
-    description: 'The user has been successfully logged out',
+    description: 'The user has been successfully signed out from the current device',
   })
-  public logout(@Res({ passthrough: true }) res: Response): void {
-    this.logger.log('Received logout request');
-    res.clearCookie('refresh_token', {
-      httpOnly: true,
-      secure: this.configService.get<string>('NODE_ENV') === 'production',
-      domain: this.configService.get<string>('COOKIE_DOMAIN'),
-      sameSite: 'lax',
-    });
+  @ApiResponse({ status: 401, description: 'Unauthorized or missing session ID' })
+  public signOutCurrentDevice(
+    @UserId() userId: string,
+    @SessionId() sessionId: string,
+    @Res({ passthrough: true }) res: Response,
+  ): Observable<StatusResponse> {
+    this.logger.log(`Received request to sign out current device for user ID: ${userId}`);
+    this.clearRefreshTokenCookie(res);
+    return this.authService.signOutCurrentDevice(userId, sessionId);
   }
 
   // Sign Out Other Devices
-  @Post('signout-other-devices')
+  @Post('logout-other-devices')
+  @UseGuards(SessionIdGuard)
   @Protected()
   @ApiOperation({
     summary: 'Sign Out Other Devices',
@@ -266,17 +260,14 @@ export class AuthController {
     status: 200,
     description: 'The user has been successfully signed out from other devices',
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized or missing session ID' })
   public signOutOtherDevices(@UserId() userId: string, @SessionId() sessionId: string): Observable<StatusResponse> {
     this.logger.log(`Received request to sign out other devices for user ID: ${userId}`);
-    if (!sessionId) {
-      this.logger.warn('No current session ID found in request');
-      throw new UnauthorizedException('Unauthorized: No current session ID found');
-    }
     return this.authService.signOutOtherDevices(userId, sessionId);
   }
 
   // Sign Out All Devices
-  @Post('signout-all-devices')
+  @Post('logout-all-devices')
   @Protected()
   @ApiOperation({
     summary: 'Sign Out All Devices',
@@ -286,12 +277,35 @@ export class AuthController {
     status: 200,
     description: 'The user has been successfully signed out from all devices',
   })
-  public signOutAllDevices(@UserId() id: string): Observable<StatusResponse> {
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  public signOutAllDevices(
+    @UserId() id: string,
+    @Res({ passthrough: true }) res: Response,
+  ): Observable<StatusResponse> {
     this.logger.log(`Received request to sign out all devices for user ID: ${id}`);
+    this.clearRefreshTokenCookie(res);
     return this.authService.signOutAllDevices(id);
   }
 
-  // Helper method to get client IP address
+  private setRefreshTokenCookie(res: Response, token: string): void {
+    res.cookie('refresh_token', token, {
+      httpOnly: true,
+      secure: this.configService.getOrThrow<string>('NODE_ENV') === 'production',
+      domain: this.configService.getOrThrow<string>('COOKIE_DOMAIN'),
+      sameSite: 'lax',
+      maxAge: this.configService.getOrThrow<number>('COOKIE_TTL') * 1000,
+    });
+  }
+
+  private clearRefreshTokenCookie(res: Response): void {
+    res.clearCookie('refresh_token', {
+      httpOnly: true,
+      secure: this.configService.getOrThrow<string>('NODE_ENV') === 'production',
+      domain: this.configService.getOrThrow<string>('COOKIE_DOMAIN'),
+      sameSite: 'lax',
+    });
+  }
+
   private getClientIp(req: Request): string {
     // Handle proxies (X-Forwarded-For header)
     const forwarded = req.headers['x-forwarded-for'];

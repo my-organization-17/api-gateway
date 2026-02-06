@@ -30,8 +30,8 @@ import type { MenuCategory, MenuCategoryList, StatusResponse } from 'src/generat
 @Protected(UserRole.ADMIN, UserRole.MODERATOR)
 @Controller('menu-category')
 export class MenuCategoryController {
+  private readonly logger = new Logger(MenuCategoryController.name);
   constructor(private readonly menuCategoryService: MenuCategoryService) {}
-  protected readonly logger = new Logger(MenuCategoryController.name);
 
   @Get()
   @ApiOperation({

@@ -18,8 +18,8 @@ import { UserService } from './user.service';
 @Protected(UserRole.ADMIN)
 @Controller('admin')
 export class AdminController {
+  private readonly logger = new Logger(AdminController.name);
   constructor(private readonly userService: UserService) {}
-  protected readonly logger = new Logger(AdminController.name);
 
   // Get user by their unique ID
   @UseInterceptors(new SerializeInterceptor(FullUserResponseDto))

@@ -50,6 +50,7 @@ describe('AuthController', () => {
   const initResetPasswordMock = jest.fn();
   const resendResetPasswordEmailMock = jest.fn();
   const setNewPasswordMock = jest.fn();
+  const signOutCurrentDeviceMock = jest.fn();
   const signOutOtherDevicesMock = jest.fn();
   const signOutAllDevicesMock = jest.fn();
   const configGetMock = jest.fn();
@@ -70,6 +71,7 @@ describe('AuthController', () => {
     initResetPasswordMock.mockReturnValue(of(mockStatusResponse));
     resendResetPasswordEmailMock.mockReturnValue(of(mockStatusResponse));
     setNewPasswordMock.mockReturnValue(of(mockStatusResponse));
+    signOutCurrentDeviceMock.mockReturnValue(of(mockStatusResponse));
     signOutOtherDevicesMock.mockReturnValue(of(mockStatusResponse));
     signOutAllDevicesMock.mockReturnValue(of(mockStatusResponse));
     configGetMock.mockImplementation((key: string) => {
@@ -93,6 +95,7 @@ describe('AuthController', () => {
             initResetPassword: initResetPasswordMock,
             resendResetPasswordEmail: resendResetPasswordEmailMock,
             setNewPassword: setNewPasswordMock,
+            signOutCurrentDevice: signOutCurrentDeviceMock,
             signOutOtherDevices: signOutOtherDevicesMock,
             signOutAllDevices: signOutAllDevicesMock,
           },
@@ -148,13 +151,22 @@ describe('AuthController', () => {
     it('should verify email, set cookie, and return response without refreshToken', async () => {
       const token = 'verification-token';
 
-      const result = await firstValueFrom(controller.verifyEmail(token, mockResponse));
+      const mockRequest = {
+        headers: { 'user-agent': 'test-agent' },
+        ip: '127.0.0.1',
+        socket: { remoteAddress: '127.0.0.1' },
+      } as unknown as Request;
+
+      const result = await firstValueFrom(controller.verifyEmail(token, mockRequest, mockResponse));
 
       expect(result).toEqual({
         accessToken: mockAuthResponse.accessToken,
         user: mockAuthResponse.user,
       });
-      expect(verifyEmailMock).toHaveBeenCalledWith(token);
+      expect(verifyEmailMock).toHaveBeenCalledWith(token, {
+        ipAddress: '127.0.0.1',
+        userAgent: 'test-agent',
+      });
       expect(cookieMock).toHaveBeenCalledWith(
         'refresh_token',
         mockAuthResponse.refreshToken,
@@ -283,20 +295,6 @@ describe('AuthController', () => {
     });
   });
 
-  describe('logout', () => {
-    it('should clear the refresh token cookie', () => {
-      controller.logout(mockResponse);
-
-      expect(clearCookieMock).toHaveBeenCalledWith(
-        'refresh_token',
-        expect.objectContaining({
-          httpOnly: true,
-          sameSite: 'lax',
-        }),
-      );
-    });
-  });
-
   describe('initResetPassword', () => {
     it('should call authService.initResetPassword', async () => {
       const email = 'test@example.com';
@@ -331,6 +329,25 @@ describe('AuthController', () => {
     });
   });
 
+  describe('signOutCurrentDevice', () => {
+    it('should call authService.signOutCurrentDevice with userId and sessionId', async () => {
+      const userId = 'test-user-id';
+      const sessionId = 'current-session-id';
+
+      const result = await firstValueFrom(controller.signOutCurrentDevice(userId, sessionId, mockResponse));
+
+      expect(result).toEqual(mockStatusResponse);
+      expect(signOutCurrentDeviceMock).toHaveBeenCalledWith(userId, sessionId);
+      expect(clearCookieMock).toHaveBeenCalledWith(
+        'refresh_token',
+        expect.objectContaining({
+          httpOnly: true,
+          sameSite: 'lax',
+        }),
+      );
+    });
+  });
+
   describe('signOutOtherDevices', () => {
     it('should call authService.signOutOtherDevices with userId and sessionId', async () => {
       const userId = 'test-user-id';
@@ -341,19 +358,13 @@ describe('AuthController', () => {
       expect(result).toEqual(mockStatusResponse);
       expect(signOutOtherDevicesMock).toHaveBeenCalledWith(userId, sessionId);
     });
-
-    it('should throw UnauthorizedException when sessionId is missing', () => {
-      const userId = 'test-user-id';
-
-      expect(() => controller.signOutOtherDevices(userId, '')).toThrow(UnauthorizedException);
-    });
   });
 
   describe('signOutAllDevices', () => {
     it('should call authService.signOutAllDevices with userId', async () => {
       const userId = 'test-user-id';
 
-      const result = await firstValueFrom(controller.signOutAllDevices(userId));
+      const result = await firstValueFrom(controller.signOutAllDevices(userId, mockResponse));
 
       expect(result).toEqual(mockStatusResponse);
       expect(signOutAllDevicesMock).toHaveBeenCalledWith(userId);

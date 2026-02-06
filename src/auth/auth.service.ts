@@ -47,10 +47,10 @@ export class AuthService implements OnModuleInit {
       .pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'resendConfirmationEmail'));
   }
 
-  verifyEmail(token: string): Observable<AuthResponse> {
+  verifyEmail(token: string, clientInfo?: { ipAddress: string; userAgent: string }): Observable<AuthResponse> {
     this.logger.log(`Verifying email with token: ${token}`);
     return this.authService
-      .verifyEmail({ token })
+      .verifyEmail({ token, clientInfo })
       .pipe(
         this.metricsService.trackGrpcCall(TARGET_SERVICE, 'verifyEmail'),
         this.metricsService.trackAuthAttempt('verify_email'),
@@ -99,6 +99,13 @@ export class AuthService implements OnModuleInit {
     return this.authService
       .setNewPassword({ token, password })
       .pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'setNewPassword'));
+  }
+
+  signOutCurrentDevice(userId: string, currentSessionId: string): Observable<StatusResponse> {
+    this.logger.log(`Signing out current device with session ID: ${currentSessionId}`);
+    return this.authService
+      .signOutCurrentDevice({ userId, currentSessionId })
+      .pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'signOutCurrentDevice'));
   }
 
   signOutOtherDevices(userId: string, currentSessionId: string): Observable<StatusResponse> {

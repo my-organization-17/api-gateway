@@ -24,7 +24,7 @@ const TARGET_SERVICE = 'user-microservice';
 @Injectable()
 export class UserService implements OnModuleInit {
   private userService: UserServiceClient;
-  protected readonly logger = new Logger(UserService.name);
+  private readonly logger = new Logger(UserService.name);
 
   constructor(
     @Inject('USER_CLIENT')

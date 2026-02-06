@@ -3,10 +3,11 @@ import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
 
 import { ROLES_KEY } from '../decorators/roles.decorator';
-import { type User, UserRole } from 'src/generated-types/user';
+import { UserRole } from 'src/generated-types/user';
+import { JwtResponseDto } from '../dto';
 
 interface RequestWithUser extends Request {
-  user?: User;
+  user?: JwtResponseDto;
 }
 
 @Injectable()

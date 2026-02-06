@@ -18,7 +18,7 @@ const TARGET_SERVICE = 'menu-microservice';
 @Injectable()
 export class MenuItemService implements OnModuleInit {
   private menuItemService: MenuItemServiceClient;
-  protected readonly logger = new Logger(MenuItemService.name);
+  private readonly logger = new Logger(MenuItemService.name);
 
   constructor(
     @Inject('MENU_ITEM_CLIENT')

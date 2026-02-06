@@ -26,8 +26,8 @@ interface HealthCheckResponse {
 @ApiTags('health-check')
 @Controller('health-check')
 export class HealthCheckController {
+  private readonly logger = new Logger(HealthCheckController.name);
   constructor(private readonly healthCheckService: HealthCheckService) {}
-  protected readonly logger = new Logger(HealthCheckController.name);
 
   @Get()
   @ApiOperation({

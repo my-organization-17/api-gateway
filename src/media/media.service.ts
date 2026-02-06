@@ -26,14 +26,13 @@ const MEDIA_SERVICE = 'media-microservice';
 export class MediaService implements OnModuleInit {
   private mediaService: MediaServiceClient;
   private userService: UserServiceClient;
+  private readonly logger = new Logger(MediaService.name);
 
   constructor(
     @Inject('MEDIA_CLIENT') private readonly mediaClient: ClientGrpc,
     @Inject('USER_CLIENT') private readonly userClient: ClientGrpc,
     private readonly metricsService: MetricsService,
   ) {}
-
-  protected readonly logger = new Logger(MediaService.name);
 
   onModuleInit() {
     this.mediaService = this.mediaClient.getService<MediaServiceClient>(MEDIA_SERVICE_NAME);

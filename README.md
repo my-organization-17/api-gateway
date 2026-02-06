@@ -115,12 +115,12 @@ docker-compose up
 | POST | `/auth/verify-email?token=` | No | Verify email address |
 | POST | `/auth/resend-confirmation-email` | No | Resend verification email |
 | POST | `/auth/refresh-tokens` | Cookie | Refresh JWT tokens |
-| POST | `/auth/logout` | JWT | Clear refresh token |
 | POST | `/auth/init-reset-password` | No | Initiate password reset |
 | POST | `/auth/resend-reset-password-email` | No | Resend password reset email |
 | POST | `/auth/set-new-password?token=` | No | Set new password |
-| POST | `/auth/signout-other-devices` | JWT | Sign out all other sessions |
-| POST | `/auth/signout-all-devices` | JWT | Sign out all sessions |
+| POST | `/auth/logout-current-device` | JWT | Clear refresh token | Sign out current session |
+| POST | `/auth/logout-other-devices` | JWT | Sign out all other sessions |
+| POST | `/auth/logout-all-devices` | JWT | Sign out all sessions |
 
 ### User (`/user`)
 
