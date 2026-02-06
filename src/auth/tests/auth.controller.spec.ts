@@ -75,6 +75,7 @@ describe('AuthController', () => {
     configGetMock.mockImplementation((key: string) => {
       if (key === 'NODE_ENV') return 'test';
       if (key === 'COOKIE_DOMAIN') return 'localhost';
+      if (key === 'COOKIE_TTL') return 604800;
       return undefined;
     });
 
@@ -100,6 +101,7 @@ describe('AuthController', () => {
           provide: ConfigService,
           useValue: {
             get: configGetMock,
+            getOrThrow: configGetMock,
           },
         },
       ],
