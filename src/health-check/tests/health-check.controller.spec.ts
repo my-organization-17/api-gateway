@@ -6,35 +6,25 @@ import { HealthCheckService } from '../health-check.service';
 describe('HealthCheckController', () => {
   let controller: HealthCheckController;
 
-  const mockMenuHealth = {
-    appHealth: { serving: true, message: 'Menu microservice app is healthy' },
-    dbHealth: { serving: true, message: 'Menu microservice database is healthy' },
-  };
+  const mockMenuHealth = { serving: true, message: 'Menu microservice app is healthy' };
+  const mockUserHealth = { serving: true, message: 'User microservice app is healthy' };
+  const mockNotificationHealth = { serving: true, message: 'Notification microservice is healthy' };
+  const mockMediaHealth = { serving: true, message: 'Media microservice app is healthy' };
 
-  const mockUserHealth = {
-    appHealth: { serving: true, message: 'User microservice app is healthy' },
-    dbHealth: { serving: true, message: 'User microservice database is healthy' },
-  };
+  const unhealthyMenuHealth = { serving: false, message: 'Menu microservice app is unavailable' };
+  const unhealthyUserHealth = { serving: false, message: 'User microservice app is unavailable' };
+  const unhealthyNotificationHealth = { serving: false, message: 'Notification microservice app is unavailable' };
+  const unhealthyMediaHealth = { serving: false, message: 'Media microservice app is unavailable' };
 
-  const mockNotificationHealth = {
-    serving: true,
-    message: 'Notification microservice is healthy',
-  };
-
-  const mockMediaHealth = {
-    appHealth: { serving: true, message: 'Media microservice app is healthy' },
-  };
-
-  const checkMenuMicroserviceHealthMock = jest.fn();
-  const checkUserMicroserviceHealthMock = jest.fn();
-  const checkNotificationMicroserviceHealthMock = jest.fn();
-  const checkMediaMicroserviceHealthMock = jest.fn();
+  const checkAllMicroservicesHealthMock = jest.fn();
 
   beforeEach(async () => {
-    checkMenuMicroserviceHealthMock.mockResolvedValue(mockMenuHealth);
-    checkUserMicroserviceHealthMock.mockResolvedValue(mockUserHealth);
-    checkNotificationMicroserviceHealthMock.mockResolvedValue(mockNotificationHealth);
-    checkMediaMicroserviceHealthMock.mockResolvedValue(mockMediaHealth);
+    checkAllMicroservicesHealthMock.mockResolvedValue({
+      menuMicroservice: mockMenuHealth,
+      userMicroservice: mockUserHealth,
+      notificationMicroservice: mockNotificationHealth,
+      mediaMicroservice: mockMediaHealth,
+    });
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [HealthCheckController],
@@ -42,10 +32,7 @@ describe('HealthCheckController', () => {
         {
           provide: HealthCheckService,
           useValue: {
-            checkMenuMicroserviceHealth: checkMenuMicroserviceHealthMock,
-            checkUserMicroserviceHealth: checkUserMicroserviceHealthMock,
-            checkNotificationMicroserviceHealth: checkNotificationMicroserviceHealthMock,
-            checkMediaMicroserviceHealth: checkMediaMicroserviceHealthMock,
+            checkAllMicroservicesHealth: checkAllMicroservicesHealthMock,
           },
         },
       ],
@@ -72,33 +59,16 @@ describe('HealthCheckController', () => {
         notificationMicroservice: mockNotificationHealth,
         mediaMicroservice: mockMediaHealth,
       });
-      expect(checkMenuMicroserviceHealthMock).toHaveBeenCalled();
-      expect(checkUserMicroserviceHealthMock).toHaveBeenCalled();
-      expect(checkNotificationMicroserviceHealthMock).toHaveBeenCalled();
-      expect(checkMediaMicroserviceHealthMock).toHaveBeenCalled();
+      expect(checkAllMicroservicesHealthMock).toHaveBeenCalled();
     });
 
     it('should return unhealthy status when microservices are down', async () => {
-      const unhealthyMenuHealth = {
-        appHealth: { serving: false, message: 'Menu microservice app is unavailable' },
-        dbHealth: { serving: false, message: 'Menu microservice database is unavailable' },
-      };
-      const unhealthyUserHealth = {
-        appHealth: { serving: false, message: 'User microservice app is unavailable' },
-        dbHealth: { serving: false, message: 'User microservice database is unavailable' },
-      };
-      const unhealthyNotificationHealth = {
-        serving: false,
-        message: 'Notification microservice app is unavailable',
-      };
-      const unhealthyMediaHealth = {
-        appHealth: { serving: false, message: 'Media microservice app is unavailable' },
-      };
-
-      checkMenuMicroserviceHealthMock.mockResolvedValue(unhealthyMenuHealth);
-      checkUserMicroserviceHealthMock.mockResolvedValue(unhealthyUserHealth);
-      checkNotificationMicroserviceHealthMock.mockResolvedValue(unhealthyNotificationHealth);
-      checkMediaMicroserviceHealthMock.mockResolvedValue(unhealthyMediaHealth);
+      checkAllMicroservicesHealthMock.mockResolvedValue({
+        menuMicroservice: unhealthyMenuHealth,
+        userMicroservice: unhealthyUserHealth,
+        notificationMicroservice: unhealthyNotificationHealth,
+        mediaMicroservice: unhealthyMediaHealth,
+      });
 
       const result = await controller.checkHealth();
 
@@ -108,6 +78,7 @@ describe('HealthCheckController', () => {
         notificationMicroservice: unhealthyNotificationHealth,
         mediaMicroservice: unhealthyMediaHealth,
       });
+      expect(checkAllMicroservicesHealthMock).toHaveBeenCalled();
     });
   });
 });

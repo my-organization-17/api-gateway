@@ -7,9 +7,17 @@ import { MessageBrokerService } from 'src/transport/message-broker/message-broke
 
 import {
   HEALTH_CHECK_SERVICE_NAME,
+  ReadinessResponse,
   type HealthCheckResponse,
   type HealthCheckServiceClient,
 } from 'src/generated-types/health-check';
+
+export interface AllAppsResponse {
+  menuMicroservice: HealthCheckResponse;
+  userMicroservice: HealthCheckResponse;
+  notificationMicroservice: HealthCheckResponse;
+  mediaMicroservice: HealthCheckResponse;
+}
 
 @Injectable()
 export class HealthCheckService implements OnModuleInit {
@@ -38,84 +46,61 @@ export class HealthCheckService implements OnModuleInit {
       this.mediaMicroserviceClient.getService<HealthCheckServiceClient>(HEALTH_CHECK_SERVICE_NAME);
   }
 
-  async checkMenuMicroserviceHealth(): Promise<{ appHealth: HealthCheckResponse; dbHealth: HealthCheckResponse }> {
-    this.logger.log('Checking Menu microservice health...');
-    try {
-      const [appHealth, dbHealth] = await Promise.all([
-        firstValueFrom(
-          this.menuHealthCheckService
-            .checkAppHealth({})
-            .pipe(this.metricsService.trackGrpcCall('menu-microservice', 'checkAppHealth')),
-        ),
-        firstValueFrom(
-          this.menuHealthCheckService
-            .checkDatabaseConnection({})
-            .pipe(this.metricsService.trackGrpcCall('menu-microservice', 'checkDatabaseConnection')),
-        ),
-      ]);
-      return { appHealth, dbHealth };
-    } catch (error) {
-      this.logger.error(`Menu microservice health check failed: ${(error as Error).message || 'Unknown error'}`);
-      return {
-        appHealth: { serving: false, message: 'Menu microservice app is unavailable' },
-        dbHealth: { serving: false, message: 'Menu microservice database is unavailable' },
-      };
-    }
-  }
-
-  async checkUserMicroserviceHealth(): Promise<{ appHealth: HealthCheckResponse; dbHealth: HealthCheckResponse }> {
-    this.logger.log('Checking User microservice health...');
-    try {
-      const [appHealth, dbHealth] = await Promise.all([
-        firstValueFrom(
-          this.userHealthCheckService
-            .checkAppHealth({})
-            .pipe(this.metricsService.trackGrpcCall('user-microservice', 'checkAppHealth')),
-        ),
-        firstValueFrom(
-          this.userHealthCheckService
-            .checkDatabaseConnection({})
-            .pipe(this.metricsService.trackGrpcCall('user-microservice', 'checkDatabaseConnection')),
-        ),
-      ]);
-      return { appHealth, dbHealth };
-    } catch (error) {
-      this.logger.error(`User microservice health check failed: ${(error as Error).message || 'Unknown error'}`);
-      return {
-        appHealth: { serving: false, message: 'User microservice app is unavailable' },
-        dbHealth: { serving: false, message: 'User microservice database is unavailable' },
-      };
-    }
-  }
-
-  async checkNotificationMicroserviceHealth(): Promise<HealthCheckResponse> {
-    this.logger.log('Checking Notification microservice health...');
-    try {
-      return await firstValueFrom(
+  async checkAllMicroservicesHealth(): Promise<AllAppsResponse> {
+    const [menuHealth, userHealth, notificationHealth, mediaHealth] = await Promise.all([
+      firstValueFrom(
+        this.menuHealthCheckService
+          .checkAppHealth({})
+          .pipe(this.metricsService.trackGrpcCall('menu-microservice', 'checkAppHealth')),
+      ).catch((error) => {
+        this.logger.error(`Menu microservice health check failed: ${(error as Error).message || 'Unknown error'}`);
+        return { serving: false, message: 'Menu microservice app is unavailable' };
+      }),
+      firstValueFrom(
+        this.userHealthCheckService
+          .checkAppHealth({})
+          .pipe(this.metricsService.trackGrpcCall('user-microservice', 'checkAppHealth')),
+      ).catch((error) => {
+        this.logger.error(`User microservice health check failed: ${(error as Error).message || 'Unknown error'}`);
+        return { serving: false, message: 'User microservice app is unavailable' };
+      }),
+      firstValueFrom(
         this.messageBrokerService.sendMessage<object, HealthCheckResponse>('health.check', {}, 3000),
-      );
-    } catch (error) {
-      this.logger.error(
-        `Notification microservice health check failed: ${(error as Error).message || 'Unknown error'}`,
-      );
-      return { serving: false, message: 'Notification microservice app is unavailable' };
-    }
-  }
-
-  async checkMediaMicroserviceHealth(): Promise<{ appHealth: HealthCheckResponse }> {
-    this.logger.log('Checking Media microservice health...');
-    try {
-      const appHealth = await firstValueFrom(
+      ).catch((error) => {
+        this.logger.error(
+          `Notification microservice health check failed: ${(error as Error).message || 'Unknown error'}`,
+        );
+        return { serving: false, message: 'Notification microservice app is unavailable' };
+      }),
+      firstValueFrom(
         this.mediaHealthCheckService
           .checkAppHealth({})
           .pipe(this.metricsService.trackGrpcCall('media-microservice', 'checkAppHealth')),
+      ).catch((error) => {
+        this.logger.error(`Media microservice health check failed: ${(error as Error).message || 'Unknown error'}`);
+        return { serving: false, message: 'Media microservice app is unavailable' };
+      }),
+    ]);
+
+    return {
+      menuMicroservice: menuHealth,
+      userMicroservice: userHealth,
+      notificationMicroservice: notificationHealth,
+      mediaMicroservice: mediaHealth,
+    };
+  }
+
+  async checkUserMicroserviceConnections(): Promise<ReadinessResponse> {
+    try {
+      const response = await firstValueFrom(
+        this.userHealthCheckService
+          .checkAppConnections({})
+          .pipe(this.metricsService.trackGrpcCall('user-microservice', 'checkConnections')),
       );
-      return { appHealth };
+      return response;
     } catch (error) {
-      this.logger.error(`Media microservice health check failed: ${(error as Error).message || 'Unknown error'}`);
-      return {
-        appHealth: { serving: false, message: 'Media microservice app is unavailable' },
-      };
+      this.logger.error(`User microservice connections check failed: ${(error as Error).message || 'Unknown error'}`);
+      return { serving: false, message: 'User microservice connections are not healthy', dependencies: [] };
     }
   }
 }

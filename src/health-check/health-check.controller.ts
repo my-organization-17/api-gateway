@@ -1,23 +1,7 @@
 import { Controller, Get, Logger } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-import { HealthCheckService } from './health-check.service';
-import type { HealthCheckResponse } from 'src/generated-types/health-check';
-
-interface AllHealthCheckResponse {
-  menuMicroservice: {
-    appHealth: HealthCheckResponse;
-    dbHealth: HealthCheckResponse;
-  };
-  userMicroservice: {
-    appHealth: HealthCheckResponse;
-    dbHealth: HealthCheckResponse;
-  };
-  notificationMicroservice: HealthCheckResponse;
-  mediaMicroservice: {
-    appHealth: HealthCheckResponse;
-  };
-}
+import { AllAppsResponse, HealthCheckService } from './health-check.service';
 
 @ApiTags('health-check')
 @Controller('health-check')
@@ -25,7 +9,7 @@ export class HealthCheckController {
   private readonly logger = new Logger(HealthCheckController.name);
   constructor(private readonly healthCheckService: HealthCheckService) {}
 
-  @Get()
+  @Get('all-apps')
   @ApiOperation({
     summary: 'Check microservices connection',
     description: 'Checks the health status of all connected microservices',
@@ -46,7 +30,7 @@ export class HealthCheckController {
             dbHealth: { serving: true, message: 'User microservice database is healthy' },
           },
           notificationMicroservice: { serving: true, message: 'Notification microservice app is healthy' },
-          mediaMicroservice: { appHealth: { serving: true, message: 'Media microservice app is healthy' } },
+          mediaMicroservice: { serving: true, message: 'Media microservice app is healthy' },
         },
       },
       example2: {
@@ -61,26 +45,51 @@ export class HealthCheckController {
             dbHealth: { serving: false, message: 'User microservice database is unavailable' },
           },
           notificationMicroservice: { serving: false, message: 'Notification microservice app is unavailable' },
-          mediaMicroservice: { appHealth: { serving: false, message: 'Media microservice app is unavailable' } },
+          mediaMicroservice: { serving: false, message: 'Media microservice app is unavailable' },
         },
       },
     },
   })
-  async checkHealth(): Promise<AllHealthCheckResponse> {
+  async checkHealth(): Promise<AllAppsResponse> {
     this.logger.log('Health check requested at API Gateway');
+    return this.healthCheckService.checkAllMicroservicesHealth();
+  }
 
-    const [menuMicroservice, userMicroservice, notificationMicroservice, mediaMicroservice] = await Promise.all([
-      this.healthCheckService.checkMenuMicroserviceHealth(),
-      this.healthCheckService.checkUserMicroserviceHealth(),
-      this.healthCheckService.checkNotificationMicroserviceHealth(),
-      this.healthCheckService.checkMediaMicroserviceHealth(),
-    ]);
-
-    return {
-      menuMicroservice,
-      userMicroservice,
-      notificationMicroservice,
-      mediaMicroservice,
-    };
+  @Get('user-connections')
+  @ApiOperation({
+    summary: 'Check user microservice connections',
+    description: 'Checks the health status of user microservice connections to its dependencies',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns the health status of user microservice connections',
+    examples: {
+      example1: {
+        summary: 'Healthy connections',
+        value: {
+          serving: true,
+          message: 'User microservice connections are healthy',
+          dependencies: [
+            { name: 'PostgreSQL', type: 'database', status: { serving: true, message: 'PostgreSQL is healthy' } },
+            { name: 'Redis', type: 'cache', status: { serving: true, message: 'Redis is healthy' } },
+          ],
+        },
+      },
+      example2: {
+        summary: 'Unhealthy connections',
+        value: {
+          serving: false,
+          message: 'User microservice connections are not healthy',
+          dependencies: [
+            { name: 'PostgreSQL', type: 'database', status: { serving: false, message: 'PostgreSQL is unavailable' } },
+            { name: 'Redis', type: 'cache', status: { serving: false, message: 'Redis is unavailable' } },
+          ],
+        },
+      },
+    },
+  })
+  async checkUserConnections() {
+    this.logger.log('User microservice connections check requested at API Gateway');
+    return this.healthCheckService.checkUserMicroserviceConnections();
   }
 }
