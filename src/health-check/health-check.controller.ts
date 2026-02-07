@@ -92,4 +92,40 @@ export class HealthCheckController {
     this.logger.log('User microservice connections check requested at API Gateway');
     return this.healthCheckService.checkUserMicroserviceConnections();
   }
+
+  @Get('menu-connections')
+  @ApiOperation({
+    summary: 'Check menu microservice connections',
+    description: 'Checks the health status of menu microservice connections to its dependencies',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns the health status of menu microservice connections',
+    examples: {
+      example1: {
+        summary: 'Healthy connections',
+        value: {
+          serving: true,
+          message: 'Menu microservice connections are healthy',
+          dependencies: [
+            { name: 'PostgreSQL', type: 'database', status: { serving: true, message: 'PostgreSQL is healthy' } },
+          ],
+        },
+      },
+      example2: {
+        summary: 'Unhealthy connections',
+        value: {
+          serving: false,
+          message: 'Menu microservice connections are not healthy',
+          dependencies: [
+            { name: 'PostgreSQL', type: 'database', status: { serving: false, message: 'PostgreSQL is unavailable' } },
+          ],
+        },
+      },
+    },
+  })
+  async checkMenuConnections() {
+    this.logger.log('Menu microservice connections check requested at API Gateway');
+    return this.healthCheckService.checkMenuMicroserviceConnections();
+  }
 }

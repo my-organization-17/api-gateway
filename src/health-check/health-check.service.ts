@@ -90,6 +90,20 @@ export class HealthCheckService implements OnModuleInit {
     };
   }
 
+  async checkMenuMicroserviceConnections(): Promise<ReadinessResponse> {
+    try {
+      const response = await firstValueFrom(
+        this.menuHealthCheckService
+          .checkAppConnections({})
+          .pipe(this.metricsService.trackGrpcCall('menu-microservice', 'checkConnections')),
+      );
+      return response;
+    } catch (error) {
+      this.logger.error(`Menu microservice connections check failed: ${(error as Error).message || 'Unknown error'}`);
+      return { serving: false, message: 'Menu microservice connections are not healthy', dependencies: [] };
+    }
+  }
+
   async checkUserMicroserviceConnections(): Promise<ReadinessResponse> {
     try {
       const response = await firstValueFrom(
