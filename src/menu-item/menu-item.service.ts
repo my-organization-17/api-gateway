@@ -4,9 +4,10 @@ import { Observable } from 'rxjs';
 
 import {
   MENU_ITEM_SERVICE_NAME,
+  MenuItemListWithTranslation,
+  MenuItemWithTranslation,
   type CreateMenuItemRequest,
   type MenuItem,
-  type MenuItemList,
   type MenuItemServiceClient,
   type StatusResponse,
   type UpdateMenuItemRequest,
@@ -30,14 +31,14 @@ export class MenuItemService implements OnModuleInit {
     this.menuItemService = this.menuItemMicroserviceClient.getService<MenuItemServiceClient>(MENU_ITEM_SERVICE_NAME);
   }
 
-  getMenuItemsByCategoryId(id: string): Observable<MenuItemList> {
+  getMenuItemsByCategoryId(id: string): Observable<MenuItemListWithTranslation> {
     this.logger.log(`Fetching menu items for category ID: ${id}`);
     return this.menuItemService
       .getMenuItemsByCategoryId({ id })
       .pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'getMenuItemsByCategoryId'));
   }
 
-  getMenuItemById(id: string): Observable<MenuItem> {
+  getMenuItemById(id: string): Observable<MenuItemWithTranslation> {
     this.logger.log(`Fetching menu item by ID: ${id}`);
     return this.menuItemService
       .getMenuItemById({ id })

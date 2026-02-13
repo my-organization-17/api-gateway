@@ -4,7 +4,8 @@ import { firstValueFrom, of } from 'rxjs';
 import { MenuItemService } from '../menu-item.service';
 import type {
   MenuItem,
-  MenuItemList,
+  MenuItemListWithTranslation,
+  MenuItemWithTranslation,
   StatusResponse,
   CreateMenuItemRequest,
   UpdateMenuItemRequest,
@@ -16,9 +17,7 @@ describe('MenuItemService', () => {
 
   const mockMenuItem: MenuItem = {
     id: 'test-item-id',
-    language: 'EN',
-    title: 'Test Menu Item',
-    description: 'Test description',
+    slug: 'test-menu-item',
     price: '10.99',
     imageUrl: 'https://example.com/image.jpg',
     isAvailable: true,
@@ -27,8 +26,18 @@ describe('MenuItemService', () => {
     updatedAt: new Date(),
   };
 
-  const mockMenuItemList: MenuItemList = {
-    menuItems: [mockMenuItem],
+  const mockMenuItemWithTranslation: MenuItemWithTranslation = {
+    id: 'test-item-id',
+    slug: 'test-menu-item',
+    price: '10.99',
+    imageUrl: 'https://example.com/image.jpg',
+    isAvailable: true,
+    position: 1,
+    translations: [{ id: 'tr-1', title: 'Test Menu Item', description: 'Test description', language: 'EN' }],
+  };
+
+  const mockMenuItemList: MenuItemListWithTranslation = {
+    menuItems: [mockMenuItemWithTranslation],
   };
 
   const mockStatusResponse: StatusResponse = {
@@ -54,7 +63,7 @@ describe('MenuItemService', () => {
 
   beforeEach(async () => {
     getMenuItemsByCategoryIdMock.mockReturnValue(of(mockMenuItemList));
-    getMenuItemByIdMock.mockReturnValue(of(mockMenuItem));
+    getMenuItemByIdMock.mockReturnValue(of(mockMenuItemWithTranslation));
     createMenuItemMock.mockReturnValue(of(mockMenuItem));
     updateMenuItemMock.mockReturnValue(of(mockMenuItem));
     deleteMenuItemMock.mockReturnValue(of(mockStatusResponse));
@@ -116,7 +125,7 @@ describe('MenuItemService', () => {
 
       const result = await firstValueFrom(service.getMenuItemById(id));
 
-      expect(result).toEqual(mockMenuItem);
+      expect(result).toEqual(mockMenuItemWithTranslation);
       expect(getMenuItemByIdMock).toHaveBeenCalledWith({ id });
     });
   });
@@ -124,13 +133,11 @@ describe('MenuItemService', () => {
   describe('createMenuItem', () => {
     it('should call menuItemService.createMenuItem with correct data', async () => {
       const createData: CreateMenuItemRequest = {
-        language: 'EN',
-        title: 'New Menu Item',
-        description: 'New description',
+        slug: 'new-menu-item',
         price: '15.99',
         imageUrl: 'https://example.com/new-image.jpg',
         isAvailable: true,
-        menuCategory: { id: 'category-id' },
+        categoryId: 'category-id',
       };
 
       const result = await firstValueFrom(service.createMenuItem(createData));
@@ -144,9 +151,7 @@ describe('MenuItemService', () => {
     it('should call menuItemService.updateMenuItem with correct data', async () => {
       const updateData: UpdateMenuItemRequest = {
         id: 'test-item-id',
-        language: 'EN',
-        title: 'Updated Menu Item',
-        description: 'Updated description',
+        slug: 'updated-menu-item',
         price: '19.99',
         imageUrl: 'https://example.com/updated-image.jpg',
         isAvailable: true,

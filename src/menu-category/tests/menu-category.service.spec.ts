@@ -3,7 +3,13 @@ import { firstValueFrom, of } from 'rxjs';
 
 import { MenuCategoryService } from '../menu-category.service';
 import { Language } from 'src/common/enums';
-import type { MenuCategory, MenuCategoryList, StatusResponse } from 'src/generated-types/menu-category';
+import type {
+  MenuCategory,
+  MenuCategoryListWithTranslation,
+  MenuCategoryWithTranslation,
+  MenuCategoryWithItems,
+  StatusResponse,
+} from 'src/generated-types/menu-category';
 import { MetricsService } from 'src/supervision/metrics/metrics.service';
 
 describe('MenuCategoryService', () => {
@@ -11,9 +17,7 @@ describe('MenuCategoryService', () => {
 
   const mockMenuCategory: MenuCategory = {
     id: 'test-category-id',
-    language: 'EN',
-    title: 'Test Category',
-    description: 'Test description',
+    slug: 'test-category',
     position: 1,
     imageUrl: 'https://example.com/image.jpg',
     isAvailable: true,
@@ -21,8 +25,22 @@ describe('MenuCategoryService', () => {
     updatedAt: new Date(),
   };
 
-  const mockMenuCategoryList: MenuCategoryList = {
-    data: [mockMenuCategory],
+  const mockMenuCategoryWithTranslation: MenuCategoryWithTranslation = {
+    id: 'test-category-id',
+    slug: 'test-category',
+    position: 1,
+    imageUrl: 'https://example.com/image.jpg',
+    isAvailable: true,
+    translations: [{ id: 'tr-1', language: 'EN', title: 'Test Category', description: 'Test description' }],
+  };
+
+  const mockMenuCategoryWithItems: MenuCategoryWithItems = {
+    ...mockMenuCategoryWithTranslation,
+    menuItems: [],
+  };
+
+  const mockMenuCategoryList: MenuCategoryListWithTranslation = {
+    data: [mockMenuCategoryWithTranslation],
   };
 
   const mockStatusResponse: StatusResponse = {
@@ -48,9 +66,9 @@ describe('MenuCategoryService', () => {
   };
 
   beforeEach(async () => {
-    getFullMenuByLanguageMock.mockReturnValue(of({ data: [{ ...mockMenuCategory, menuItems: [] }] }));
+    getFullMenuByLanguageMock.mockReturnValue(of({ data: [mockMenuCategoryWithItems] }));
     getMenuCategoriesByLanguageMock.mockReturnValue(of(mockMenuCategoryList));
-    getMenuCategoryByIdMock.mockReturnValue(of(mockMenuCategory));
+    getMenuCategoryByIdMock.mockReturnValue(of(mockMenuCategoryWithTranslation));
     createMenuCategoryMock.mockReturnValue(of(mockMenuCategory));
     updateMenuCategoryMock.mockReturnValue(of(mockMenuCategory));
     changeMenuCategoryPositionMock.mockReturnValue(of(mockMenuCategory));
@@ -132,7 +150,7 @@ describe('MenuCategoryService', () => {
 
       const result = await firstValueFrom(service.getMenuCategoryById(id));
 
-      expect(result).toEqual(mockMenuCategory);
+      expect(result).toEqual(mockMenuCategoryWithTranslation);
       expect(getMenuCategoryByIdMock).toHaveBeenCalledWith({ id });
     });
   });
@@ -140,9 +158,9 @@ describe('MenuCategoryService', () => {
   describe('createMenuCategory', () => {
     it('should call menuCategoryService.createMenuCategory with correct data', async () => {
       const createData = {
-        language: 'EN',
-        title: 'New Category',
-        description: 'New description',
+        slug: 'new-category',
+        imageUrl: 'https://example.com/image.jpg',
+        isAvailable: true,
       };
 
       const result = await firstValueFrom(service.createMenuCategory(createData));
@@ -157,8 +175,7 @@ describe('MenuCategoryService', () => {
       const id = 'test-category-id';
       const updateData = {
         language: Language.EN,
-        title: 'Updated Category',
-        description: 'Updated description',
+        slug: 'updated-category',
         imageUrl: 'https://example.com/updated-image.jpg',
         isAvailable: true,
       };

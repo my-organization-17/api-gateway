@@ -24,7 +24,12 @@ import { MenuCategoryService } from './menu-category.service';
 import { CreateMenuCategoryDto } from './dto/create-menu-category.dto';
 import { UpdateMenuCategoryDto } from './dto/update-menu-category.dto';
 
-import type { MenuCategory, MenuCategoryList, StatusResponse } from 'src/generated-types/menu-category';
+import type {
+  MenuCategory,
+  MenuCategoryListWithTranslation,
+  MenuCategoryWithTranslation,
+  StatusResponse,
+} from 'src/generated-types/menu-category';
 
 @ApiTags('menu-category')
 @Protected(UserRole.ADMIN, UserRole.MODERATOR)
@@ -46,7 +51,6 @@ export class MenuCategoryController {
   })
   @ApiResponse({
     status: 200,
-    type: Observable<MenuCategoryList>,
     description: 'Returns the list of menu categories for the specified language',
   })
   getMenuCategoriesByLanguage(
@@ -58,7 +62,7 @@ export class MenuCategoryController {
       }),
     )
     language: Language,
-  ): Observable<MenuCategoryList> {
+  ): Observable<MenuCategoryListWithTranslation> {
     this.logger.log(`Received request for menu categories in language: ${language}`);
     return this.menuCategoryService.getMenuCategoriesByLanguage(language);
   }
@@ -78,7 +82,7 @@ export class MenuCategoryController {
     type: Observable<MenuCategory>,
     description: 'Returns the menu category with the specified ID',
   })
-  getMenuCategoryById(@Param('id', new ParseUUIDPipe()) id: string): Observable<MenuCategory> {
+  getMenuCategoryById(@Param('id', new ParseUUIDPipe()) id: string): Observable<MenuCategoryWithTranslation> {
     this.logger.log(`Received request for menu category with ID: ${id}`);
     return this.menuCategoryService.getMenuCategoryById(id);
   }

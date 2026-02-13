@@ -6,9 +6,10 @@ import {
   type CreateMenuCategoryRequest,
   MENU_CATEGORY_SERVICE_NAME,
   type MenuCategory,
-  type MenuCategoryList,
   type MenuCategoryListWithItems,
+  MenuCategoryListWithTranslation,
   type MenuCategoryServiceClient,
+  MenuCategoryWithTranslation,
   type StatusResponse,
 } from 'src/generated-types/menu-category';
 import { MetricsService } from 'src/supervision/metrics/metrics.service';
@@ -39,14 +40,14 @@ export class MenuCategoryService implements OnModuleInit {
       .pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'getFullMenuByLanguage'));
   }
 
-  getMenuCategoriesByLanguage(language = 'EN'): Observable<MenuCategoryList> {
+  getMenuCategoriesByLanguage(language = 'EN'): Observable<MenuCategoryListWithTranslation> {
     this.logger.log(`Fetching menu categories for language: ${language}`);
     return this.menuCategoryService
       .getMenuCategoriesByLanguage({ language })
       .pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'getMenuCategoriesByLanguage'));
   }
 
-  getMenuCategoryById(id: string): Observable<MenuCategory> {
+  getMenuCategoryById(id: string): Observable<MenuCategoryWithTranslation> {
     this.logger.log(`Fetching menu category by ID: ${id}`);
     return this.menuCategoryService
       .getMenuCategoryById({ id })

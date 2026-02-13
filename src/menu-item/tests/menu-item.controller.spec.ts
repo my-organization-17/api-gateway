@@ -3,17 +3,19 @@ import { firstValueFrom, of } from 'rxjs';
 
 import { MenuItemController } from '../menu-item.controller';
 import { MenuItemService } from '../menu-item.service';
-import { Language } from 'src/common/enums';
-import type { MenuItem, MenuItemList, StatusResponse } from 'src/generated-types/menu-item';
+import type {
+  MenuItem,
+  MenuItemListWithTranslation,
+  MenuItemWithTranslation,
+  StatusResponse,
+} from 'src/generated-types/menu-item';
 
 describe('MenuItemController', () => {
   let controller: MenuItemController;
 
   const mockMenuItem: MenuItem = {
     id: 'test-item-id',
-    language: 'EN',
-    title: 'Test Menu Item',
-    description: 'Test description',
+    slug: 'test-menu-item',
     price: '10.99',
     imageUrl: 'https://example.com/image.jpg',
     isAvailable: true,
@@ -22,8 +24,18 @@ describe('MenuItemController', () => {
     updatedAt: new Date(),
   };
 
-  const mockMenuItemList: MenuItemList = {
-    menuItems: [mockMenuItem],
+  const mockMenuItemWithTranslation: MenuItemWithTranslation = {
+    id: 'test-item-id',
+    slug: 'test-menu-item',
+    price: '10.99',
+    imageUrl: 'https://example.com/image.jpg',
+    isAvailable: true,
+    position: 1,
+    translations: [{ id: 'tr-1', title: 'Test Menu Item', description: 'Test description', language: 'EN' }],
+  };
+
+  const mockMenuItemList: MenuItemListWithTranslation = {
+    menuItems: [mockMenuItemWithTranslation],
   };
 
   const mockStatusResponse: StatusResponse = {
@@ -40,7 +52,7 @@ describe('MenuItemController', () => {
 
   beforeEach(async () => {
     getMenuItemsByCategoryIdMock.mockReturnValue(of(mockMenuItemList));
-    getMenuItemByIdMock.mockReturnValue(of(mockMenuItem));
+    getMenuItemByIdMock.mockReturnValue(of(mockMenuItemWithTranslation));
     createMenuItemMock.mockReturnValue(of(mockMenuItem));
     updateMenuItemMock.mockReturnValue(of(mockMenuItem));
     deleteMenuItemMock.mockReturnValue(of(mockStatusResponse));
@@ -91,7 +103,7 @@ describe('MenuItemController', () => {
 
       const result = await firstValueFrom(controller.getMenuItemById(id));
 
-      expect(result).toEqual(mockMenuItem);
+      expect(result).toEqual(mockMenuItemWithTranslation);
       expect(getMenuItemByIdMock).toHaveBeenCalledWith(id);
     });
   });
@@ -99,13 +111,11 @@ describe('MenuItemController', () => {
   describe('createMenuItem', () => {
     it('should call menuItemService.createMenuItem with correct data', async () => {
       const createData = {
-        language: Language.EN,
-        title: 'New Menu Item',
-        description: 'New description',
+        slug: 'new-menu-item',
         price: '15.99',
         imageUrl: 'https://example.com/new-image.jpg',
         isAvailable: true,
-        menuCategory: { id: 'category-id' },
+        categoryId: 'category-id',
       };
 
       const result = await firstValueFrom(controller.createMenuItem(createData));
@@ -119,9 +129,7 @@ describe('MenuItemController', () => {
     it('should call menuItemService.updateMenuItem with correct data', async () => {
       const updateData = {
         id: 'test-item-id',
-        language: Language.EN,
-        title: 'Updated Menu Item',
-        description: 'Updated description',
+        slug: 'updated-menu-item',
         price: '19.99',
         imageUrl: 'https://example.com/updated-image.jpg',
         isAvailable: true,

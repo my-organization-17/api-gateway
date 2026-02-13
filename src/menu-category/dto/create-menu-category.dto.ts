@@ -14,12 +14,7 @@ export class CreateMenuCategoryDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  readonly title: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  readonly description: string;
+  readonly slug: string;
 
   @ApiProperty({ required: false })
   @IsOptional()

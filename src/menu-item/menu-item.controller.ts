@@ -22,7 +22,12 @@ import { MenuItemService } from './menu-item.service';
 import { CreateMenuItemDto } from './dto/create-menu-item.dto';
 import { UpdateMenuItemDto } from './dto/update-menu-item.dto';
 
-import type { MenuItem, MenuItemList, StatusResponse } from 'src/generated-types/menu-item';
+import type {
+  MenuItem,
+  MenuItemListWithTranslation,
+  MenuItemWithTranslation,
+  StatusResponse,
+} from 'src/generated-types/menu-item';
 
 @ApiTags('menu-item')
 @Protected(UserRole.ADMIN, UserRole.MODERATOR)
@@ -43,7 +48,7 @@ export class MenuItemController {
   })
   @ApiResponse({
     status: 200,
-    type: Observable<MenuItemList>,
+    type: Observable<MenuItemListWithTranslation>,
     description: 'Returns the list of menu items for the specified category ID',
   })
   getMenuItemsByCategoryId(
@@ -54,7 +59,7 @@ export class MenuItemController {
       }),
     )
     categoryId: string,
-  ): Observable<MenuItemList> {
+  ): Observable<MenuItemListWithTranslation> {
     this.logger.log(`Fetching menu items for category ID: ${categoryId}`);
     return this.menuItemService.getMenuItemsByCategoryId(categoryId);
   }
@@ -71,7 +76,7 @@ export class MenuItemController {
   })
   @ApiResponse({
     status: 200,
-    type: Observable<MenuItem>,
+    type: Observable<MenuItemWithTranslation>,
     description: 'Returns the menu item for the specified ID',
   })
   getMenuItemById(
@@ -82,7 +87,7 @@ export class MenuItemController {
       }),
     )
     id: string,
-  ): Observable<MenuItem> {
+  ): Observable<MenuItemWithTranslation> {
     this.logger.log(`Fetching menu item with ID: ${id}`);
     return this.menuItemService.getMenuItemById(id);
   }
