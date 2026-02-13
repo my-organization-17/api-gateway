@@ -10,7 +10,7 @@ import { Language } from 'src/common/enums/language.enum';
 @ApiTags('full-menu')
 @Controller('full-menu')
 @UseInterceptors(CacheInterceptor)
-@CacheTTL(60 * 1000)
+@CacheTTL(10 * 1000)
 export class FullMenuController {
   private readonly logger = new Logger(FullMenuController.name);
   constructor(private readonly menuCategoryService: MenuCategoryService) {}
