@@ -7,7 +7,7 @@ import type {
   MenuCategory,
   MenuCategoryListWithTranslation,
   MenuCategoryWithTranslation,
-  MenuCategoryWithItems,
+  FlatMenuCategoryWithItems,
   StatusResponse,
 } from 'src/generated-types/menu-category';
 import { MetricsService } from 'src/supervision/metrics/metrics.service';
@@ -34,8 +34,15 @@ describe('MenuCategoryService', () => {
     translations: [{ id: 'tr-1', language: 'EN', title: 'Test Category', description: 'Test description' }],
   };
 
-  const mockMenuCategoryWithItems: MenuCategoryWithItems = {
-    ...mockMenuCategoryWithTranslation,
+  const mockFlatMenuCategoryWithItems: FlatMenuCategoryWithItems = {
+    id: 'test-category-id',
+    slug: 'test-category',
+    position: 1,
+    imageUrl: 'https://example.com/image.jpg',
+    isAvailable: true,
+    language: 'EN',
+    title: 'Test Category',
+    description: 'Test description',
     menuItems: [],
   };
 
@@ -66,7 +73,7 @@ describe('MenuCategoryService', () => {
   };
 
   beforeEach(async () => {
-    getFullMenuByLanguageMock.mockReturnValue(of({ data: [mockMenuCategoryWithItems] }));
+    getFullMenuByLanguageMock.mockReturnValue(of({ categories: [mockFlatMenuCategoryWithItems] }));
     getMenuCategoriesByLanguageMock.mockReturnValue(of(mockMenuCategoryList));
     getMenuCategoryByIdMock.mockReturnValue(of(mockMenuCategoryWithTranslation));
     createMenuCategoryMock.mockReturnValue(of(mockMenuCategory));
@@ -118,7 +125,7 @@ describe('MenuCategoryService', () => {
     it('should call menuCategoryService.getFullMenuByLanguage with correct language', async () => {
       const result = await firstValueFrom(service.getFullMenuByLanguage('EN'));
 
-      expect(result.data).toHaveLength(1);
+      expect(result.categories).toHaveLength(1);
       expect(getFullMenuByLanguageMock).toHaveBeenCalledWith({ language: 'EN' });
     });
 

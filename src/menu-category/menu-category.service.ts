@@ -4,12 +4,12 @@ import { Observable } from 'rxjs';
 
 import {
   type CreateMenuCategoryRequest,
+  type FullMenuResponse,
   MENU_CATEGORY_SERVICE_NAME,
   type MenuCategory,
-  type MenuCategoryListWithItems,
-  MenuCategoryListWithTranslation,
+  type MenuCategoryListWithTranslation,
   type MenuCategoryServiceClient,
-  MenuCategoryWithTranslation,
+  type MenuCategoryWithTranslation,
   type StatusResponse,
 } from 'src/generated-types/menu-category';
 import { MetricsService } from 'src/supervision/metrics/metrics.service';
@@ -33,7 +33,7 @@ export class MenuCategoryService implements OnModuleInit {
       this.menuCategoryMicroserviceClient.getService<MenuCategoryServiceClient>(MENU_CATEGORY_SERVICE_NAME);
   }
 
-  getFullMenuByLanguage(language = 'EN'): Observable<MenuCategoryListWithItems> {
+  getFullMenuByLanguage(language = 'EN'): Observable<FullMenuResponse> {
     this.logger.log(`Fetching full menu for language: ${language}`);
     return this.menuCategoryService
       .getFullMenuByLanguage({ language })

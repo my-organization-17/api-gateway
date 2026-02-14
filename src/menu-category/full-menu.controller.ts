@@ -4,7 +4,7 @@ import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 import { Observable } from 'rxjs';
 
 import { MenuCategoryService } from './menu-category.service';
-import type { MenuCategoryListWithItems } from 'src/generated-types/menu-category';
+import type { FullMenuResponse } from 'src/generated-types/menu-category';
 import { Language } from 'src/common/enums/language.enum';
 
 @ApiTags('full-menu')
@@ -39,7 +39,7 @@ export class FullMenuController {
       }),
     )
     language: Language,
-  ): Observable<MenuCategoryListWithItems> {
+  ): Observable<FullMenuResponse> {
     this.logger.log(`Received request for full menu in language: ${language}`);
     return this.menuCategoryService.getFullMenuByLanguage(language);
   }
