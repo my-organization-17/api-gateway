@@ -11,7 +11,7 @@ describe('MediaService', () => {
   const mockUser = {
     id: 'user-123',
     email: 'test@example.com',
-    avatarUrl: 'avatar-key-123.jpg',
+    avatarUrl: 'avatar/avatar-key-123.jpg',
   };
 
   const mockUserWithoutAvatar = {
@@ -98,7 +98,7 @@ describe('MediaService', () => {
       const result = await service.getImageUrl('user-123');
 
       expect(getUserByIdMock).toHaveBeenCalledWith({ id: 'user-123' });
-      expect(getImageUrlMock).toHaveBeenCalledWith({ fileKey: 'avatar/' + mockUser.avatarUrl });
+      expect(getImageUrlMock).toHaveBeenCalledWith({ fileKey: mockUser.avatarUrl });
       expect(result).toBeDefined();
     });
 
@@ -149,7 +149,7 @@ describe('MediaService', () => {
       const result = await service.uploadAvatar(uploadRequest);
 
       expect(getUserByIdMock).toHaveBeenCalledWith({ id: 'user-123' });
-      expect(deleteAvatarMock).toHaveBeenCalledWith({ fileKey: 'avatar/' + mockUser.avatarUrl });
+      expect(deleteAvatarMock).toHaveBeenCalledWith({ fileKey: mockUser.avatarUrl });
       expect(uploadAvatarMock).toHaveBeenCalledWith(uploadRequest);
       expect(updateUserMock).toHaveBeenCalledWith({ id: 'user-123', avatarUrl: mockFileUrl.fileUrl });
       expect(result).toEqual(mockFileUrl);
@@ -189,7 +189,7 @@ describe('MediaService', () => {
       const result = await service.removeAvatar('user-123');
 
       expect(getUserByIdMock).toHaveBeenCalledWith({ id: 'user-123' });
-      expect(deleteAvatarMock).toHaveBeenCalledWith({ fileKey: 'avatar/' + mockUser.avatarUrl });
+      expect(deleteAvatarMock).toHaveBeenCalledWith({ fileKey: mockUser.avatarUrl });
       expect(updateUserMock).toHaveBeenCalledWith({ id: 'user-123', avatarUrl: '' });
       expect(result).toEqual({
         success: true,

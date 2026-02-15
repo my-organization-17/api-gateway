@@ -53,7 +53,7 @@ export class MediaService implements OnModuleInit {
       throw new BadRequestException('User does not have an avatar');
     }
     return this.mediaService
-      .getImageUrl({ fileKey: 'avatar/' + user.avatarUrl })
+      .getImageUrl({ fileKey: user.avatarUrl })
       .pipe(this.metricsService.trackGrpcCall(MEDIA_SERVICE, 'getImageUrl'));
   }
 
@@ -72,7 +72,7 @@ export class MediaService implements OnModuleInit {
       this.logger.log(`User with ID ${data.id} already has an avatar, removing old avatar`);
       await firstValueFrom(
         this.mediaService
-          .deleteAvatar({ fileKey: 'avatar/' + user.avatarUrl })
+          .deleteAvatar({ fileKey: user.avatarUrl })
           .pipe(this.metricsService.trackGrpcCall(MEDIA_SERVICE, 'deleteAvatar')),
       );
     }
@@ -105,7 +105,7 @@ export class MediaService implements OnModuleInit {
     }
     await firstValueFrom(
       this.mediaService
-        .deleteAvatar({ fileKey: 'avatar/' + user.avatarUrl })
+        .deleteAvatar({ fileKey: user.avatarUrl })
         .pipe(this.metricsService.trackGrpcCall(MEDIA_SERVICE, 'deleteAvatar')),
     );
     await firstValueFrom(
