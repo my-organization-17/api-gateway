@@ -2,11 +2,14 @@ import { ClientsProviderAsyncOptions, Transport } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
 
 import { HEALTH_CHECK_V1_PACKAGE_NAME } from 'src/generated-types/health-check';
-import { MENU_CATEGORY_V1_PACKAGE_NAME } from 'src/generated-types/menu-category';
-import { MENU_ITEM_V1_PACKAGE_NAME } from 'src/generated-types/menu-item';
 import { AUTH_V1_PACKAGE_NAME } from 'src/generated-types/auth';
 import { USER_V1_PACKAGE_NAME } from 'src/generated-types/user';
+import { MENU_CATEGORY_V1_PACKAGE_NAME } from 'src/generated-types/menu-category';
+import { MENU_ITEM_V1_PACKAGE_NAME } from 'src/generated-types/menu-item';
 import { MEDIA_V1_PACKAGE_NAME } from 'src/generated-types/media';
+import { STORE_ATTRIBUTE_V1_PACKAGE_NAME } from 'src/generated-types/store-attribute';
+import { STORE_CATEGORY_V1_PACKAGE_NAME } from 'src/generated-types/store-category';
+import { STORE_ITEM_V1_PACKAGE_NAME } from 'src/generated-types/store-item';
 
 export class GrpcConfig {
   static createGrpcClientOptions({
@@ -103,6 +106,33 @@ export class GrpcConfig {
       protoPath: 'proto/media.proto',
       packageName: MEDIA_V1_PACKAGE_NAME,
       urlConfigKey: 'MEDIA_MICROSERVICE_GRPC_URL',
+    });
+  }
+
+  static storeAttributeClientOptions(): ClientsProviderAsyncOptions {
+    return GrpcConfig.createGrpcClientOptions({
+      serviceName: 'STORE_ATTRIBUTE_CLIENT',
+      protoPath: 'proto/store-attribute.proto',
+      packageName: STORE_ATTRIBUTE_V1_PACKAGE_NAME,
+      urlConfigKey: 'STORE_MICROSERVICE_GRPC_URL',
+    });
+  }
+
+  static storeCategoryClientOptions(): ClientsProviderAsyncOptions {
+    return GrpcConfig.createGrpcClientOptions({
+      serviceName: 'STORE_CATEGORY_CLIENT',
+      protoPath: 'proto/store-category.proto',
+      packageName: STORE_CATEGORY_V1_PACKAGE_NAME,
+      urlConfigKey: 'STORE_MICROSERVICE_GRPC_URL',
+    });
+  }
+
+  static storeItemClientOptions(): ClientsProviderAsyncOptions {
+    return GrpcConfig.createGrpcClientOptions({
+      serviceName: 'STORE_ITEM_CLIENT',
+      protoPath: 'proto/store-item.proto',
+      packageName: STORE_ITEM_V1_PACKAGE_NAME,
+      urlConfigKey: 'STORE_MICROSERVICE_GRPC_URL',
     });
   }
 }

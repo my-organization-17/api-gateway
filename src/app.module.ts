@@ -12,6 +12,7 @@ import { MessageBrokerModule } from './transport/message-broker/message-broker.m
 import { MenuItemModule } from './menu-item/menu-item.module';
 import { MetricsModule } from './supervision/metrics/metrics.module';
 import { MediaModule } from './media/media.module';
+import { StoreCategoryModule } from './store-category/store-category.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { MediaModule } from './media/media.module';
     MenuItemModule,
     MetricsModule,
     MediaModule,
+    StoreCategoryModule,
   ],
   controllers: [],
   providers: [],
