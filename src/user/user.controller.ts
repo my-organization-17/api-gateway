@@ -5,10 +5,15 @@ import { Observable } from 'rxjs';
 import { Protected, UserId } from 'src/auth/decorators';
 import { PasswordRequestDto, UserResponseDto } from '../common/dto';
 import { SerializeInterceptor } from '../utils/serialize.interceptor';
-import { UserUpdateRequestDto } from './dto';
+import { DeliveryAddressRequestDto, UserUpdateRequestDto } from './dto';
 import { UserService } from './user.service';
 
-import type { StatusResponse } from 'src/generated-types/user';
+import type {
+  DeliveryAddress,
+  GetDeliveryAddressesResponse,
+  StatusResponse,
+  UpsertDeliveryAddressRequest,
+} from 'src/generated-types/user';
 
 @ApiTags('user')
 @Protected()
@@ -32,6 +37,21 @@ export class UserController {
   getProfile(@UserId() userId: string): Observable<UserResponseDto> {
     this.logger.log('Received request to get user profile');
     return this.userService.getUserById(userId, userId);
+  }
+
+  // Get delivery addresses
+  @Get('/delivery-addresses')
+  @ApiOperation({
+    summary: 'Get delivery addresses',
+    description: 'Retrieves the delivery addresses of the currently authenticated user',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns the delivery addresses of the currently authenticated user',
+  })
+  getDeliveryAddresses(@UserId() userId: string): Observable<GetDeliveryAddressesResponse> {
+    this.logger.log(`Received request to get delivery addresses for user ID: ${userId}`);
+    return this.userService.getDeliveryAddresses(userId);
   }
 
   // Get a user by their unique ID
@@ -122,5 +142,48 @@ export class UserController {
   changePassword(@UserId() userId: string, @Body() data: PasswordRequestDto): Observable<StatusResponse> {
     this.logger.log(`Received request to change password for user ID: ${userId}`);
     return this.userService.changePassword({ id: userId, ...data });
+  }
+
+  // Upsert delivery address
+  @Post('/delivery-addresses')
+  @ApiOperation({
+    summary: 'Upsert delivery address',
+    description: 'Creates or updates a delivery address for the currently authenticated user',
+  })
+  @ApiBody({ type: DeliveryAddressRequestDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns the created or updated delivery address',
+  })
+  upsertDeliveryAddress(
+    @UserId() userId: string,
+    @Body() data: UpsertDeliveryAddressRequest,
+  ): Observable<DeliveryAddress> {
+    this.logger.log(`Received request to upsert delivery address for user ID: ${userId}`);
+    return this.userService.upsertDeliveryAddress(data.addressId ? { ...data } : { ...data, userId });
+  }
+
+  // Delete delivery address
+  @Delete('/delivery-addresses/:id')
+  @ApiOperation({
+    summary: 'Delete delivery address',
+    description: 'Deletes a delivery address of the currently authenticated user',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Unique identifier of the delivery address',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Delivery address successfully deleted',
+  })
+  deleteDeliveryAddress(
+    @UserId() userId: string,
+    @Param('id', new ParseUUIDPipe()) addressId: string,
+  ): Observable<StatusResponse> {
+    this.logger.log(`Received request to delete delivery address with ID: ${addressId} for user ID: ${userId}`);
+    return this.userService.deleteDeliveryAddress(addressId);
   }
 }

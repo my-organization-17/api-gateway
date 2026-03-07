@@ -8,11 +8,14 @@ import {
   type AllUsersResponse,
   type BanDetailsResponse,
   type BanUserRequest,
+  type DeliveryAddress,
   type GetBannedUsersResponse,
+  type GetDeliveryAddressesResponse,
   type PaginationMeta,
   type PasswordRequest,
   type StatusResponse,
   type UpdateUserRequest,
+  type UpsertDeliveryAddressRequest,
   type User,
   type UserRoleRequest,
   type UserServiceClient,
@@ -107,5 +110,26 @@ export class UserService implements OnModuleInit {
     return this.userService
       .changeUserRole(data)
       .pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'changeUserRole'));
+  }
+
+  getDeliveryAddresses(userId: string): Observable<GetDeliveryAddressesResponse> {
+    this.logger.log(`Fetching delivery addresses for user ID: ${userId}`);
+    return this.userService
+      .getDeliveryAddresses({ id: userId })
+      .pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'getDeliveryAddresses'));
+  }
+
+  upsertDeliveryAddress(data: UpsertDeliveryAddressRequest): Observable<DeliveryAddress> {
+    this.logger.log(`Upserting delivery address for user ID: ${data.userId}`);
+    return this.userService
+      .upsertDeliveryAddress(data)
+      .pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'upsertDeliveryAddress'));
+  }
+
+  deleteDeliveryAddress(addressId: string): Observable<StatusResponse> {
+    this.logger.log(`Deleting delivery address with ID: ${addressId}`);
+    return this.userService
+      .deleteDeliveryAddress({ id: addressId })
+      .pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'deleteDeliveryAddress'));
   }
 }
