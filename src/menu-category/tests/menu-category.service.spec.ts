@@ -6,6 +6,7 @@ import { Language } from 'src/common/enums';
 import type {
   MenuCategory,
   MenuCategoryListWithTranslation,
+  MenuCategoryTranslation,
   MenuCategoryWithTranslation,
   FlatMenuCategoryWithItems,
   StatusResponse,
@@ -55,6 +56,13 @@ describe('MenuCategoryService', () => {
     message: 'Operation successful',
   };
 
+  const mockMenuCategoryTranslation: MenuCategoryTranslation = {
+    id: 'tr-1',
+    language: 'EN',
+    title: 'Test Category',
+    description: 'Test description',
+  };
+
   const getFullMenuByLanguageMock = jest.fn();
   const getMenuCategoriesByLanguageMock = jest.fn();
   const getMenuCategoryByIdMock = jest.fn();
@@ -62,6 +70,9 @@ describe('MenuCategoryService', () => {
   const updateMenuCategoryMock = jest.fn();
   const changeMenuCategoryPositionMock = jest.fn();
   const deleteMenuCategoryMock = jest.fn();
+  const createMenuCategoryTranslationMock = jest.fn();
+  const updateMenuCategoryTranslationMock = jest.fn();
+  const deleteMenuCategoryTranslationMock = jest.fn();
 
   const passthrough =
     <T>() =>
@@ -80,6 +91,9 @@ describe('MenuCategoryService', () => {
     updateMenuCategoryMock.mockReturnValue(of(mockMenuCategory));
     changeMenuCategoryPositionMock.mockReturnValue(of(mockMenuCategory));
     deleteMenuCategoryMock.mockReturnValue(of(mockStatusResponse));
+    createMenuCategoryTranslationMock.mockReturnValue(of(mockMenuCategoryTranslation));
+    updateMenuCategoryTranslationMock.mockReturnValue(of(mockMenuCategoryTranslation));
+    deleteMenuCategoryTranslationMock.mockReturnValue(of(mockStatusResponse));
 
     const mockMenuCategoryServiceClient = {
       getFullMenuByLanguage: getFullMenuByLanguageMock,
@@ -89,6 +103,9 @@ describe('MenuCategoryService', () => {
       updateMenuCategory: updateMenuCategoryMock,
       changeMenuCategoryPosition: changeMenuCategoryPositionMock,
       deleteMenuCategory: deleteMenuCategoryMock,
+      createMenuCategoryTranslation: createMenuCategoryTranslationMock,
+      updateMenuCategoryTranslation: updateMenuCategoryTranslationMock,
+      deleteMenuCategoryTranslation: deleteMenuCategoryTranslationMock,
     };
 
     const mockGrpcClient = {
@@ -214,6 +231,48 @@ describe('MenuCategoryService', () => {
 
       expect(result).toEqual(mockStatusResponse);
       expect(deleteMenuCategoryMock).toHaveBeenCalledWith({ id });
+    });
+  });
+
+  describe('createMenuCategoryTranslation', () => {
+    it('should call menuCategoryService.createMenuCategoryTranslation with correct data', async () => {
+      const createData = {
+        categoryId: 'test-category-id',
+        language: Language.EN,
+        title: 'Test Category',
+        description: 'Test description',
+      };
+
+      const result = await firstValueFrom(service.createMenuCategoryTranslation(createData));
+
+      expect(result).toEqual(mockMenuCategoryTranslation);
+      expect(createMenuCategoryTranslationMock).toHaveBeenCalledWith(createData);
+    });
+  });
+
+  describe('updateMenuCategoryTranslation', () => {
+    it('should call menuCategoryService.updateMenuCategoryTranslation with correct data', async () => {
+      const updateData = {
+        id: 'tr-1',
+        title: 'Updated Title',
+        description: 'Updated description',
+      };
+
+      const result = await firstValueFrom(service.updateMenuCategoryTranslation(updateData));
+
+      expect(result).toEqual(mockMenuCategoryTranslation);
+      expect(updateMenuCategoryTranslationMock).toHaveBeenCalledWith(updateData);
+    });
+  });
+
+  describe('deleteMenuCategoryTranslation', () => {
+    it('should call menuCategoryService.deleteMenuCategoryTranslation with correct id', async () => {
+      const id = 'tr-1';
+
+      const result = await firstValueFrom(service.deleteMenuCategoryTranslation(id));
+
+      expect(result).toEqual(mockStatusResponse);
+      expect(deleteMenuCategoryTranslationMock).toHaveBeenCalledWith({ id });
     });
   });
 });

@@ -13,6 +13,7 @@ import { MenuItemModule } from './menu-item/menu-item.module';
 import { MetricsModule } from './supervision/metrics/metrics.module';
 import { MediaModule } from './media/media.module';
 import { StoreCategoryModule } from './store-category/store-category.module';
+import { StoreAttributeModule } from './store-attribute/store-attribute.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { StoreCategoryModule } from './store-category/store-category.module';
     MetricsModule,
     MediaModule,
     StoreCategoryModule,
+    StoreAttributeModule,
   ],
   controllers: [],
   providers: [],

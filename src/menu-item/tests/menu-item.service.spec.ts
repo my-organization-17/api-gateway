@@ -2,9 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { firstValueFrom, of } from 'rxjs';
 
 import { MenuItemService } from '../menu-item.service';
+import { Language } from 'src/common/enums';
 import type {
   MenuItem,
   MenuItemListWithTranslation,
+  MenuItemTranslation,
   MenuItemWithTranslation,
   StatusResponse,
   CreateMenuItemRequest,
@@ -45,12 +47,22 @@ describe('MenuItemService', () => {
     message: 'Operation successful',
   };
 
+  const mockMenuItemTranslation: MenuItemTranslation = {
+    id: 'tr-1',
+    language: 'EN',
+    title: 'Test Menu Item',
+    description: 'Test description',
+  };
+
   const getMenuItemsByCategoryIdMock = jest.fn();
   const getMenuItemByIdMock = jest.fn();
   const createMenuItemMock = jest.fn();
   const updateMenuItemMock = jest.fn();
   const deleteMenuItemMock = jest.fn();
   const changeMenuItemPositionMock = jest.fn();
+  const createMenuItemTranslationMock = jest.fn();
+  const updateMenuItemTranslationMock = jest.fn();
+  const deleteMenuItemTranslationMock = jest.fn();
 
   const passthrough =
     <T>() =>
@@ -68,6 +80,9 @@ describe('MenuItemService', () => {
     updateMenuItemMock.mockReturnValue(of(mockMenuItem));
     deleteMenuItemMock.mockReturnValue(of(mockStatusResponse));
     changeMenuItemPositionMock.mockReturnValue(of(mockMenuItem));
+    createMenuItemTranslationMock.mockReturnValue(of(mockMenuItemTranslation));
+    updateMenuItemTranslationMock.mockReturnValue(of(mockMenuItemTranslation));
+    deleteMenuItemTranslationMock.mockReturnValue(of(mockStatusResponse));
 
     const mockMenuItemServiceClient = {
       getMenuItemsByCategoryId: getMenuItemsByCategoryIdMock,
@@ -76,6 +91,9 @@ describe('MenuItemService', () => {
       updateMenuItem: updateMenuItemMock,
       deleteMenuItem: deleteMenuItemMock,
       changeMenuItemPosition: changeMenuItemPositionMock,
+      createMenuItemTranslation: createMenuItemTranslationMock,
+      updateMenuItemTranslation: updateMenuItemTranslationMock,
+      deleteMenuItemTranslation: deleteMenuItemTranslationMock,
     };
 
     const mockGrpcClient = {
@@ -184,6 +202,48 @@ describe('MenuItemService', () => {
 
       expect(result).toEqual(mockMenuItem);
       expect(changeMenuItemPositionMock).toHaveBeenCalledWith({ id, position });
+    });
+  });
+
+  describe('createMenuItemTranslation', () => {
+    it('should call menuItemService.createMenuItemTranslation with correct data', async () => {
+      const createData = {
+        itemId: 'test-item-id',
+        language: Language.EN,
+        title: 'Test Menu Item',
+        description: 'Test description',
+      };
+
+      const result = await firstValueFrom(service.createMenuItemTranslation(createData));
+
+      expect(result).toEqual(mockMenuItemTranslation);
+      expect(createMenuItemTranslationMock).toHaveBeenCalledWith(createData);
+    });
+  });
+
+  describe('updateMenuItemTranslation', () => {
+    it('should call menuItemService.updateMenuItemTranslation with correct data', async () => {
+      const updateData = {
+        id: 'tr-1',
+        title: 'Updated Title',
+        description: 'Updated description',
+      };
+
+      const result = await firstValueFrom(service.updateMenuItemTranslation(updateData));
+
+      expect(result).toEqual(mockMenuItemTranslation);
+      expect(updateMenuItemTranslationMock).toHaveBeenCalledWith(updateData);
+    });
+  });
+
+  describe('deleteMenuItemTranslation', () => {
+    it('should call menuItemService.deleteMenuItemTranslation with correct id', async () => {
+      const id = 'tr-1';
+
+      const result = await firstValueFrom(service.deleteMenuItemTranslation(id));
+
+      expect(result).toEqual(mockStatusResponse);
+      expect(deleteMenuItemTranslationMock).toHaveBeenCalledWith({ id });
     });
   });
 });

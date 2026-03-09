@@ -35,6 +35,8 @@ api-gateway/
 │   ├── user/                    # User profile & admin management
 │   ├── menu-category/           # Menu category CRUD operations
 │   ├── menu-item/               # Menu item management
+│   ├── store-category/          # Store category management
+│   ├── store-attribute/         # Store attribute management
 │   ├── media/                   # File upload (avatars)
 │   ├── health-check/            # Microservices health monitoring
 │   ├── supervision/
@@ -59,6 +61,7 @@ api-gateway/
 | User Microservice | gRPC | Authentication, user management |
 | Menu Microservice | gRPC | Menu categories and items |
 | Media Microservice | gRPC | File storage operations |
+| Store Microservice | gRPC | Store categories and attributes |
 | Notification Microservice | RabbitMQ | Email notifications |
 
 ## Environment Variables
@@ -68,16 +71,18 @@ Create a `.env` file based on `.env.example`:
 ```env
 # Server
 NODE_ENV=development
-HTTP_PORT=
+HTTP_PORT=4004
 
 # gRPC Microservices
 MENU_MICROSERVICE_GRPC_URL=0.0.0.0:5001
 USER_MICROSERVICE_GRPC_URL=0.0.0.0:5002
 MEDIA_MICROSERVICE_GRPC_URL=0.0.0.0:5003
+STORE_MICROSERVICE_GRPC_URL=0.0.0.0:5004
 
 # Cookie Configuration
 COOKIE_SECRET=your_cookie_secret_key_here
 COOKIE_DOMAIN=your_domain
+COOKIE_TTL=604800
 
 # JWT
 JWT_ACCESS_SECRET=your_jwt_access_secret_key
@@ -179,6 +184,31 @@ docker-compose up
 | PATCH | `/menu-item/update` | ADMIN/MOD | Update menu item |
 | PATCH | `/menu-item/change-position/:id` | ADMIN/MOD | Reorder menu item |
 | DELETE | `/menu-item/:id` | ADMIN/MOD | Delete menu item |
+
+### Store Category (`/store-category`)
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/store-category` | No | Get all store categories (public) |
+| GET | `/store-category/:id` | ADMIN/MOD | Get store category details |
+| POST | `/store-category/create` | ADMIN/MOD | Create store category |
+| PATCH | `/store-category/update` | ADMIN/MOD | Update store category |
+| DELETE | `/store-category/delete/:id` | ADMIN/MOD | Delete store category |
+| PATCH | `/store-category/change-position/:id` | ADMIN/MOD | Reorder store category |
+| POST | `/store-category/translation` | ADMIN/MOD | Add/update category translation |
+| DELETE | `/store-category/translation/:id` | ADMIN/MOD | Delete category translation |
+
+### Store Attribute (`/store-attribute`)
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/store-attribute/category/:categoryId` | ADMIN/MOD | Get attributes by category |
+| POST | `/store-attribute/create` | ADMIN/MOD | Create store attribute |
+| PATCH | `/store-attribute/update` | ADMIN/MOD | Update store attribute |
+| DELETE | `/store-attribute/:id` | ADMIN/MOD | Delete store attribute |
+| PATCH | `/store-attribute/change-position` | ADMIN/MOD | Reorder store attribute |
+| POST | `/store-attribute/translation/upsert` | ADMIN/MOD | Add/update attribute translation |
+| DELETE | `/store-attribute/translation/:id` | ADMIN/MOD | Delete attribute translation |
 
 ### Media (`/media`)
 
@@ -290,6 +320,9 @@ Proto definitions are located in `/proto/`:
 - `user.proto` - User service
 - `menu-category.proto` - Menu category service
 - `menu-item.proto` - Menu item service
+- `store-category.proto` - Store category service
+- `store-attribute.proto` - Store attribute service
+- `store-item.proto` - Store item service
 - `media.proto` - Media service
 - `health-check.proto` - Health check service
 
@@ -303,19 +336,19 @@ Generated TypeScript types are in `src/generated-types/`.
 └─────────────┘                    │   (Port 4004)   │
                                    └────────┬────────┘
                                             │
-              ┌────────────────┬────────────┼────────────┬────────────────┐
-              │                │            │            │                │
-              ▼ gRPC           ▼ gRPC       ▼ gRPC       ▼ RabbitMQ      ▼ gRPC
-     ┌───────────────┐ ┌───────────────┐ ┌──────────┐ ┌──────────────┐ ┌─────────┐
-     │     User      │ │     Menu      │ │  Media   │ │ Notification │ │ Jaeger  │
-     │ Microservice  │ │ Microservice  │ │  Micro   │ │ Microservice │ │ Tracing │
-     │  (Port 5002)  │ │  (Port 5001)  │ │ (5003)   │ │   (Queue)    │ │ (4317)  │
-     └───────┬───────┘ └───────┬───────┘ └────┬─────┘ └──────────────┘ └─────────┘
-             │                 │              │
-             ▼                 ▼              ▼
-     ┌───────────────┐ ┌───────────────┐ ┌──────────┐
-     │   Postgresql  │ │   Postgresql  │ │  S3/Minio│
-     └───────────────┘ └───────────────┘ └──────────┘
+              ┌────────────────┬────────────┼────────────┬────────────────┬────────────────┐
+              │                │            │            │                │                │
+              ▼ gRPC           ▼ gRPC       ▼ gRPC       ▼ gRPC           ▼ RabbitMQ      ▼ gRPC
+     ┌───────────────┐ ┌───────────────┐ ┌──────────┐ ┌──────────────┐ ┌──────────────┐ ┌─────────┐
+     │     User      │ │     Menu      │ │  Media   │ │    Store     │ │ Notification │ │ Jaeger  │
+     │ Microservice  │ │ Microservice  │ │  Micro   │ │ Microservice │ │ Microservice │ │ Tracing │
+     │  (Port 5002)  │ │  (Port 5001)  │ │ (5003)   │ │  (Port 5004) │ │   (Queue)    │ │ (4317)  │
+     └───────┬───────┘ └───────┬───────┘ └────┬─────┘ └──────┬───────┘ └──────────────┘ └─────────┘
+             │                 │              │               │
+             ▼                 ▼              ▼               ▼
+     ┌───────────────┐ ┌───────────────┐ ┌──────────┐ ┌───────────────┐
+     │   Postgresql  │ │   Postgresql  │ │  S3/Minio│ │  Postgresql   │
+     └───────────────┘ └───────────────┘ └──────────┘ └───────────────┘
 ```
 
 ## License
