@@ -4,13 +4,16 @@ import { Observable } from 'rxjs';
 
 import {
   MENU_ITEM_SERVICE_NAME,
-  MenuItemListWithTranslation,
-  MenuItemWithTranslation,
   type CreateMenuItemRequest,
+  type CreateMenuItemTranslationRequest,
   type MenuItem,
+  type MenuItemListWithTranslation,
   type MenuItemServiceClient,
+  type MenuItemTranslation,
+  type MenuItemWithTranslation,
   type StatusResponse,
   type UpdateMenuItemRequest,
+  type UpdateMenuItemTranslationRequest,
 } from 'src/generated-types/menu-item';
 import { MetricsService } from 'src/supervision/metrics/metrics.service';
 
@@ -71,5 +74,26 @@ export class MenuItemService implements OnModuleInit {
     return this.menuItemService
       .changeMenuItemPosition({ id, position })
       .pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'changeMenuItemPosition'));
+  }
+
+  createMenuItemTranslation(data: CreateMenuItemTranslationRequest): Observable<MenuItemTranslation> {
+    this.logger.log(`Creating translation for menu item with data: ${JSON.stringify(data)}`);
+    return this.menuItemService
+      .createMenuItemTranslation(data)
+      .pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'createMenuItemTranslation'));
+  }
+
+  updateMenuItemTranslation(data: UpdateMenuItemTranslationRequest): Observable<MenuItemTranslation> {
+    this.logger.log(`Updating translation for menu item with data: ${JSON.stringify(data)}`);
+    return this.menuItemService
+      .updateMenuItemTranslation(data)
+      .pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'updateMenuItemTranslation'));
+  }
+
+  deleteMenuItemTranslation(id: string): Observable<StatusResponse> {
+    this.logger.log(`Deleting translation for menu item with ID: ${id}`);
+    return this.menuItemService
+      .deleteMenuItemTranslation({ id })
+      .pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'deleteMenuItemTranslation'));
   }
 }

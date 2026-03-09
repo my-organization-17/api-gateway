@@ -19,12 +19,17 @@ import { Protected } from 'src/auth/decorators/protected.decorator';
 import { PositionRequestDto } from 'src/common/dto';
 
 import { MenuItemService } from './menu-item.service';
-import { CreateMenuItemDto } from './dto/create-menu-item.dto';
-import { UpdateMenuItemDto } from './dto/update-menu-item.dto';
+import {
+  CreateMenuItemDto,
+  CreateMenuItemTranslationDto,
+  UpdateMenuItemDto,
+  UpdateMenuItemTranslationDto,
+} from './dto';
 
 import type {
   MenuItem,
   MenuItemListWithTranslation,
+  MenuItemTranslation,
   MenuItemWithTranslation,
   StatusResponse,
 } from 'src/generated-types/menu-item';
@@ -185,5 +190,71 @@ export class MenuItemController {
   ): Observable<MenuItem> {
     this.logger.log(`Received request to change position of menu item with ID: ${id} to position: ${position}`);
     return this.menuItemService.changeMenuItemPosition({ id, position });
+  }
+
+  @Post('/translation/create')
+  @ApiOperation({
+    summary: 'Create a new menu item translation',
+    description: 'Creates a new translation for a menu item with the provided details',
+  })
+  @ApiBody({
+    type: CreateMenuItemTranslationDto,
+    description: 'Data transfer object for creating a new menu item translation',
+  })
+  @ApiResponse({
+    status: 201,
+    type: Observable<MenuItemTranslation>,
+    description: 'Returns the created menu item translation',
+  })
+  createMenuItemTranslation(@Body() data: CreateMenuItemTranslationDto): Observable<MenuItemTranslation> {
+    this.logger.log(`Creating a new menu item translation with data: ${JSON.stringify(data)}`);
+    return this.menuItemService.createMenuItemTranslation(data);
+  }
+
+  @Patch('/translation/update')
+  @ApiOperation({
+    summary: 'Update an existing menu item translation',
+    description: 'Updates the details of an existing menu item translation',
+  })
+  @ApiBody({
+    type: UpdateMenuItemTranslationDto,
+    description: 'Data transfer object for updating a menu item translation',
+  })
+  @ApiResponse({
+    status: 200,
+    type: Observable<MenuItemTranslation>,
+    description: 'Returns the updated menu item translation',
+  })
+  updateMenuItemTranslation(@Body() data: UpdateMenuItemTranslationDto): Observable<MenuItemTranslation> {
+    this.logger.log(`Updating menu item translation with data: ${JSON.stringify(data)}`);
+    return this.menuItemService.updateMenuItemTranslation(data);
+  }
+
+  @Delete('/translation/:id')
+  @ApiOperation({
+    summary: 'Delete a menu item translation by ID',
+    description: 'Deletes the menu item translation with the specified UUID',
+  })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'UUID of the menu item translation to delete',
+  })
+  @ApiResponse({
+    status: 200,
+    type: Observable<MenuItemTranslation>,
+    description: 'Returns the deleted menu item translation',
+  })
+  deleteMenuItemTranslation(
+    @Param(
+      'id',
+      new ParseUUIDPipe({
+        exceptionFactory: () => new BadRequestException('Invalid UUID format for menu item translation ID'),
+      }),
+    )
+    id: string,
+  ): Observable<StatusResponse> {
+    this.logger.log(`Deleting menu item translation with ID: ${id}`);
+    return this.menuItemService.deleteMenuItemTranslation(id);
   }
 }

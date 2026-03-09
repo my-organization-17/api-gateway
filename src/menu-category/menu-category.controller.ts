@@ -21,12 +21,17 @@ import { UserRole } from 'src/generated-types/user';
 
 import { PositionRequestDto } from '../common/dto/position.request.dto';
 import { MenuCategoryService } from './menu-category.service';
-import { CreateMenuCategoryDto } from './dto/create-menu-category.dto';
-import { UpdateMenuCategoryDto } from './dto/update-menu-category.dto';
+import {
+  CreateMenuCategoryDto,
+  CreateMenuCategoryTranslationDto,
+  UpdateMenuCategoryDto,
+  UpdateMenuCategoryTranslationDto,
+} from './dto';
 
 import type {
   MenuCategory,
   MenuCategoryListWithTranslation,
+  MenuCategoryTranslation,
   MenuCategoryWithTranslation,
   StatusResponse,
 } from 'src/generated-types/menu-category';
@@ -174,5 +179,63 @@ export class MenuCategoryController {
   deleteMenuCategory(@Param('id', new ParseUUIDPipe()) id: string): Observable<StatusResponse> {
     this.logger.log(`Received request to delete menu category with ID: ${id}`);
     return this.menuCategoryService.deleteMenuCategory(id);
+  }
+
+  @Post('create-translation')
+  @ApiOperation({
+    summary: 'Create a new menu category translation',
+    description: 'Creates a new menu category translation with the provided data',
+  })
+  @ApiBody({
+    type: CreateMenuCategoryTranslationDto,
+    description: 'Data for the new menu category translation',
+  })
+  @ApiResponse({
+    status: 201,
+    type: Observable<MenuCategoryTranslation>,
+    description: 'Returns the newly created menu category translation',
+  })
+  createMenuCategoryTranslation(@Body() data: CreateMenuCategoryTranslationDto): Observable<MenuCategoryTranslation> {
+    this.logger.log('Received request to create a new menu category translation');
+    return this.menuCategoryService.createMenuCategoryTranslation(data);
+  }
+
+  @Patch('update-translation')
+  @ApiOperation({
+    summary: 'Update an existing menu category translation',
+    description: 'Updates an existing menu category translation with the provided data',
+  })
+  @ApiBody({
+    type: UpdateMenuCategoryTranslationDto,
+    description: 'Updated data for the menu category translation',
+  })
+  @ApiResponse({
+    status: 200,
+    type: Observable<MenuCategoryTranslation>,
+    description: 'Returns the updated menu category translation',
+  })
+  updateMenuCategoryTranslation(@Body() data: UpdateMenuCategoryTranslationDto): Observable<MenuCategoryTranslation> {
+    this.logger.log(`Received request to update menu category translation with ID: ${data.id}`);
+    return this.menuCategoryService.updateMenuCategoryTranslation(data);
+  }
+
+  @Delete('delete-translation/:id')
+  @ApiOperation({
+    summary: 'Delete a menu category translation',
+    description: 'Deletes the menu category translation with the specified ID',
+  })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'The ID of the menu category translation to delete',
+  })
+  @ApiResponse({
+    status: 200,
+    type: Observable<StatusResponse>,
+    description: 'Returns the status of the delete operation',
+  })
+  deleteMenuCategoryTranslation(@Param('id', new ParseUUIDPipe()) id: string): Observable<StatusResponse> {
+    this.logger.log(`Received request to delete menu category translation with ID: ${id}`);
+    return this.menuCategoryService.deleteMenuCategoryTranslation(id);
   }
 }

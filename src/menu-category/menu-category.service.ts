@@ -4,13 +4,16 @@ import { Observable } from 'rxjs';
 
 import {
   type CreateMenuCategoryRequest,
+  type CreateMenuCategoryTranslationRequest,
   type FullMenuResponse,
   MENU_CATEGORY_SERVICE_NAME,
   type MenuCategory,
   type MenuCategoryListWithTranslation,
   type MenuCategoryServiceClient,
+  type MenuCategoryTranslation,
   type MenuCategoryWithTranslation,
   type StatusResponse,
+  type UpdateMenuCategoryTranslationRequest,
 } from 'src/generated-types/menu-category';
 import { MetricsService } from 'src/supervision/metrics/metrics.service';
 import { UpdateMenuCategoryDto } from './dto/update-menu-category.dto';
@@ -80,5 +83,26 @@ export class MenuCategoryService implements OnModuleInit {
     return this.menuCategoryService
       .deleteMenuCategory({ id })
       .pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'deleteMenuCategory'));
+  }
+
+  createMenuCategoryTranslation(data: CreateMenuCategoryTranslationRequest): Observable<MenuCategoryTranslation> {
+    this.logger.log(`Creating menu category translation with data: ${JSON.stringify(data)}`);
+    return this.menuCategoryService
+      .createMenuCategoryTranslation(data)
+      .pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'createMenuCategoryTranslation'));
+  }
+
+  updateMenuCategoryTranslation(data: UpdateMenuCategoryTranslationRequest): Observable<MenuCategoryTranslation> {
+    this.logger.log(`Updating menu category translation with ID: ${data.id} and data: ${JSON.stringify(data)}`);
+    return this.menuCategoryService
+      .updateMenuCategoryTranslation(data)
+      .pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'updateMenuCategoryTranslation'));
+  }
+
+  deleteMenuCategoryTranslation(id: string): Observable<StatusResponse> {
+    this.logger.log(`Deleting menu category translation with ID: ${id}`);
+    return this.menuCategoryService
+      .deleteMenuCategoryTranslation({ id })
+      .pipe(this.metricsService.trackGrpcCall(TARGET_SERVICE, 'deleteMenuCategoryTranslation'));
   }
 }
