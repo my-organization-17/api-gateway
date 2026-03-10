@@ -37,6 +37,7 @@ api-gateway/
 │   ├── menu-item/               # Menu item management
 │   ├── store-category/          # Store category management
 │   ├── store-attribute/         # Store attribute management
+│   ├── store-item/              # Store item management (products)
 │   ├── media/                   # File upload (avatars)
 │   ├── health-check/            # Microservices health monitoring
 │   ├── supervision/
@@ -61,7 +62,7 @@ api-gateway/
 | User Microservice | gRPC | Authentication, user management |
 | Menu Microservice | gRPC | Menu categories and items |
 | Media Microservice | gRPC | File storage operations |
-| Store Microservice | gRPC | Store categories and attributes |
+| Store Microservice | gRPC | Store categories, attributes, and items |
 | Notification Microservice | RabbitMQ | Email notifications |
 
 ## Environment Variables
@@ -209,6 +210,38 @@ docker-compose up
 | PATCH | `/store-attribute/change-position` | ADMIN/MOD | Reorder store attribute |
 | POST | `/store-attribute/translation/upsert` | ADMIN/MOD | Add/update attribute translation |
 | DELETE | `/store-attribute/translation/:id` | ADMIN/MOD | Delete attribute translation |
+
+### Store Item (`/store-item`)
+
+#### Public Endpoints (no auth required)
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/store-item/by-category-id/:categoryId?language=` | No | Get items by category ID with translations |
+| GET | `/store-item/by-category-slug/:categorySlug?language=` | No | Get items by category slug with translations |
+| GET | `/store-item/:id?language=` | No | Get store item by ID with options |
+
+#### Admin Endpoints
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/store-item/:id` | ADMIN/MOD | Get store item by ID |
+| POST | `/store-item/create` | ADMIN/MOD | Create store item |
+| PATCH | `/store-item/update` | ADMIN/MOD | Update store item |
+| DELETE | `/store-item/delete/:id` | ADMIN/MOD | Delete store item |
+| PATCH | `/store-item/change-position/:id` | ADMIN/MOD | Reorder store item |
+| POST | `/store-item/translation` | ADMIN/MOD | Add/update item translation |
+| DELETE | `/store-item/translation/:id` | ADMIN/MOD | Delete item translation |
+| POST | `/store-item/image` | ADMIN/MOD | Add image to store item |
+| DELETE | `/store-item/image/:id` | ADMIN/MOD | Remove image from store item |
+| PATCH | `/store-item/image/change-position/:id` | ADMIN/MOD | Reorder item image |
+| POST | `/store-item/variant` | ADMIN/MOD | Link attribute as item variant |
+| DELETE | `/store-item/variant/:id` | ADMIN/MOD | Remove item variant |
+| POST | `/store-item/variant/translation` | ADMIN/MOD | Add/update variant attribute translation |
+| POST | `/store-item/variant/price` | ADMIN/MOD | Add price for variant |
+| DELETE | `/store-item/variant/price/:id` | ADMIN/MOD | Remove variant price |
+| POST | `/store-item/base-price` | ADMIN/MOD | Add base price (non-variant items) |
+| DELETE | `/store-item/base-price/:id` | ADMIN/MOD | Remove base price |
 
 ### Media (`/media`)
 
