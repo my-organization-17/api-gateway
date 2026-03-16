@@ -13,7 +13,7 @@
 ![ESLint](https://img.shields.io/badge/ESLint-4B32C3?style=flat&logo=eslint&logoColor=white)
 ![Prettier](https://img.shields.io/badge/Prettier-F7B93E?style=flat&logo=prettier&logoColor=black)
 
-Central entry point for the CoffeeDoor microservices ecosystem. This service handles authentication, authorization, request routing, and provides observability features for all downstream microservices.
+Central entry point for microservices ecosystem. This service handles authentication, authorization, request routing, and provides observability features for all downstream microservices.
 
 ## Technology Stack
 
@@ -380,7 +380,7 @@ Generated TypeScript types are in `src/generated-types/`.
              │                 │              │               │
              ▼                 ▼              ▼               ▼
      ┌───────────────┐ ┌───────────────┐ ┌──────────┐ ┌───────────────┐
-     │   Postgresql  │ │   Postgresql  │ │  S3/Minio│ │  Postgresql   │
+     │   Postgresql  │ │   Postgresql  │ │  AWS S3  │ │  Postgresql   │
      └───────────────┘ └───────────────┘ └──────────┘ └───────────────┘
 ```
 
